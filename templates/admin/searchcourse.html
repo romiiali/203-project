@@ -7,25 +7,33 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    {% include 'admin-nav-bar.html' %}
     <h1 style="text-align: center;">Search Courses</h1>
     <div>
         <div id="search-bar">
-                <input type="text" id="course-search-input" placeholder="Search for a course...">
+            <input type="text" id="course-search-input" placeholder="Search for a course..."  value="{{ search_query }}"/>
             <button id="course-search-button">Search</button>
+            {%if search_query%}
+                <a href="/admin/searchcourse">
+                    <button id="clear-search-button">Clear Search</button>
+                </a>
+            {%endif%}
         </div>
         <div id="course-container">
-            <div id="top-info">
-                <h2>Course Code- Course Name</h2>
-            <p>Description Lorem, ipsum dolor sit amet consectetur adipisicing elit. Totam quas necessitatibus perferendis nihil saepe nostrum!</p>
-            <p>instructor name</p>
-            </div>
-            <div id="bottom-info">
-                <p>seats left: 20</p>
-                <p>credits: 7</p>
-                <a href="viewcourse.html">
-                    <button id="view-btn">View</button>
-                </a>
-            </div>
+            {%for course in courses %}
+                <div id="top-info">
+                    <h2>{{course.code}}-{{course.name}}</h2>
+                <p>instructor name: {{course.instructor}}</p>
+                <p>TA name: {{course.TA}}</p>
+                </div>
+                <div id="bottom-info">
+                    <p>seats left: {{course.seats}}</p>
+                    <p>credits: {{course.credits}}</p>
+                    <a href="/admin/viewcourse/{{ course.id }} ">
+                        <button id="view-btn">View</button>
+                    </a>
+                </div>
+            {%endfor%}
         </div>
     </div>
 </body>

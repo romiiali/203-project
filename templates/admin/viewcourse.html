@@ -9,29 +9,31 @@
 <body style="padding: 50px;background-color: burlywood;">
     {% include 'admin-nav-bar.html' %}
     <h1 style="text-align: center;">View Course</h1>
-    <div id="course-info">
-        <div id="course-col-1">
-            <p style="font-weight: bold;font-size: x-large;">Course Name-Course Code</p>
-            <p>instructor name</p>
-            <p>TA name</p>
-        </div>
-        <div id="course-col-2">
-            <a href="/admin/editcourse/{{ course.id }} ">
-                <button>Change Instructor</button>
-            </a>
-        </div>
-    </div>
-    <div id="student-container">
-        <h1 style="text-align: center;background-color: wheat;border-radius: 10px;">Student List</h1>
-        {%for student in students %}
-            <!-- we need a function that returns students as an array of students enrolled in the course -->
-            <div id="student-list-item">
-                <h2>Student Name: rtrycbvnmn</h2>
-                <p>Student ID: 345678</p>
-                <p>Major: 56789</p>
-                <button id="remove-btn">remove</button>
+    {%if course%}
+        <div id="course-info">
+            <div id="course-col-1">
+                <p style="font-weight: bold;font-size: x-large;">{%course.name%}--{%course.code%}</p>
+                <p>{%course.instructor%}</p>
+                <p>{%course.TA%}</p>
             </div>
-        {%endfor%}
-    </div>
+            <div id="course-col-2">
+                <a href="/admin/editcourse/{{ course.id }} ">
+                    <button>Change Instructor</button>
+                </a>
+            </div>
+        </div>
+        <div id="student-container">
+            <h1 style="text-align: center;background-color: wheat;border-radius: 10px;">Student List</h1>
+            {%for student in students %}
+                <!-- we need a function that returns students as an array of students enrolled in the course -->
+                <div id="student-list-item">
+                    <h2>{%student.name%}</h2>
+                    <p>Student ID: {%student.id%}</p>
+                    <p>Major</p>
+                    <button id="remove-btn">remove</button>
+                </div>
+            {%endfor%}
+        </div>
+    {%endif%}
 </body>
 </html>

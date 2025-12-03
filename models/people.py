@@ -37,9 +37,16 @@ class People:
         return None
 
     def delete_person(self,id):
+
         people_data = self.get_all_people()
         for pearson in people_data:
             if pearson.id == id:
                 people_data.remove(pearson)
                 return people_data
         return None
+    
+    def get_person_by_role(self, role):
+        people_data = self.get_all_people()
+        filtered_people = [person for person in people_data if person.role == role]
+        return filtered_people
+

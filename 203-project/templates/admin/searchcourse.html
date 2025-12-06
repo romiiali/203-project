@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Course</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    {% include 'admin-nav-bar.html' %}
+    <h1 style="text-align: center;">Search Courses</h1>
+    <div>
+        <div id="search-bar">
+            <input type="text" id="course-search-input" placeholder="Search for a course..."  value="{{ search_query }}"/>
+            <button id="course-search-button">Search</button>
+            {%if search_query%}
+                <a href="/admin/searchcourse">
+                    <button id="clear-search-button">Clear Search</button>
+                </a>
+            {%endif%}
+        </div>
+        <div id="course-container">
+            {%for course in courses %}
+                <div id="top-info">
+                    <h2>{{course.code}}-{{course.name}}</h2>
+                <p>instructor name: {{course.instructor}}</p>
+                <p>TA name: {{course.TA}}</p>
+                </div>
+                <div id="bottom-info">
+                    <p>seats left: {{course.seats}}</p>
+                    <p>credits: {{course.credits}}</p>
+                    <a href="/admin/viewcourse/{{ course.code }} ">
+                        <button id="view-btn">View</button>
+                    </a>
+                </div>
+            {%endfor%}
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements - {{ course.code }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1 style="text-align: center;">Course Announcements</h1>
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h3>{{ course.code }} - {{ course.name }}</h3>
+    </div>
+    
+    <div id="container1">
+        {% if announcements %}
+            {% for announcement in announcements %}
+                <div class="announcement">
+                    <h4>{{ announcement.title }}</h4>
+                    <div style="color: #78909c; font-size: .9rem; margin-bottom: .8rem;">
+                        <span><i class="far fa-calendar"></i> {{ announcement.timestamp }}</span>
+                        <span style="margin-left: 15px;">
+                            <i class="fas fa-user"></i> 
+                            {% set poster = announcement.get_poster() %}
+                            {{ poster.name if poster else 'Unknown' }}
+                        </span>
+                    </div>
+                    <p>{{ announcement.content }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align: center; padding: 40px; color: #666;">
+                <p>No announcements for this course yet.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/student/course/{{ course.id }}" style="margin-right: 15px;">Back to Course</a>
+        <a href="/student/courses">My Courses</a>
+    </div>
+</body>
+</html>

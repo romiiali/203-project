@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -122,4 +123,130 @@ a {
 
 a:hover {
     text-decoration: underline;
+=======
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f4;
+}
+
+#container1 {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#container2 {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+#option {
+    width: 200px;
+    height: 100px;
+    background-color: #3498db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: transform 0.2s;
+}
+
+#option:hover {
+    transform: translateY(-5px);
+    background-color: #2980b9;
+}
+
+#option a {
+    text-decoration: none;
+    color: white;
+    text-align: center;
+    width: 100%;
+}
+
+.course-card, .announcement, .assignment {
+    background-color: #f9f9f9;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid #3498db;
+    border-radius: 4px;
+}
+
+.announcement {
+    border-left-color: #2ecc71;
+}
+
+.assignment {
+    border-left-color: #e74c3c;
+}
+
+button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-drop {
+    background-color: #e74c3c;
+    color: white;
+    margin-right: 10px;
+}
+
+.btn-drop:hover {
+    background-color: #c0392b;
+}
+
+.btn-view {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-view:hover {
+    background-color: #2980b9;
+}
+
+.btn-submit {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-submit:hover {
+    background-color: #27ae60;
+}
+
+.btn-large {
+    display: inline-block;
+    background-color: #3498db;
+    color: white;
+    padding: 15px 30px;
+    margin: 0 10px;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.btn-submit-large {
+    background-color: #2ecc71;
+    color: white;
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+>>>>>>> 20617a8a8979aaf50a951e6b8ac6723f6f13f32b
 }

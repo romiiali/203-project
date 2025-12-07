@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,4 +67,74 @@
         <a href="/logout" style="color: #e74c3c;">Logout</a>
     </div>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1 style="text-align: center;">Student Dashboard</h1>
+    
+    <div style="text-align: center; margin: 20px 0;">
+        <p>Welcome, <strong>{{ student.name }}</strong>!</p>
+        <p>ID: {{ student.id }} | Major: {{ student.major }} | Level: {{ student.level }}</p>
+    </div>
+    
+    <div id="container1">
+        <div id="container2">
+            <div id="option">
+                <a href="/student/courses">
+                    <h2 style="margin: 5px;">View Enrolled Courses</h2>
+                    <p style="font-size: 14px; margin: 5px;">
+                        {{ student.enrolled_courses|length }} courses
+                    </p>
+                </a>
+            </div>
+            <div id="option">
+                <a href="/student/search">
+                    <h2 style="margin: 5px;">Search Courses</h2>
+                    <p style="font-size: 14px; margin: 5px;">
+                        Browse available courses
+                    </p>
+                </a>
+            </div>
+            <div id="option">
+                <a href="/student/schedule">
+                    <h2 style="margin: 5px;">My Schedule</h2>
+                    <p style="font-size: 14px; margin: 5px;">
+                        View weekly timetable
+                    </p>
+                </a>
+            </div>
+            <div id="option">
+                <a href="/student/grades">
+                    <h2 style="margin: 5px;">View Grades</h2>
+                    <p style="font-size: 14px; margin: 5px;">
+                        Check your grades
+                    </p>
+                </a>
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
+            <h3 style="text-align: center;">Recent Activities</h3>
+            <p style="text-align: center; color: #666;">
+                {% if student.enrolled_courses %}
+                    You are enrolled in {{ student.enrolled_courses|length }} course(s).
+                {% else %}
+                    You are not enrolled in any courses yet.
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/logout" style="color: #e74c3c;">Logout</a>
+    </div>
+</body>
+>>>>>>> 20617a8a8979aaf50a951e6b8ac6723f6f13f32b
 </html>

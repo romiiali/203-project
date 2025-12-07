@@ -168,14 +168,14 @@ class Course:
     def get_instructor(self):
         """Get the instructor object for this course"""
         if self.instructor_id:
-            from user import User
+            from models.user import User
             return User.get_by_id(self.instructor_id)
         return None
     
     def get_ta(self):
         """Get the TA object for this course"""
         if self.ta_id:
-            from user import User
+            from models.user import User
             return User.get_by_id(self.ta_id)
         return None
     
@@ -235,7 +235,7 @@ class Course:
     
     def get_enrolled_students(self):
         """Get list of enrolled student objects"""
-        from student import Student
+        from models.student import Student
         enrolled = []
         for student_id in self.enrolled_students:
             student = Student.get_by_id(student_id)

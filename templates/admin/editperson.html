@@ -7,8 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    {% include 'admin-nav-bar.html' %}
-    <h1 style="text-align: center;">Person Name - ID</h1>
+    {% include 'admin/admin-nav-bar.html' %}
+    {%if person %}
+    <h1 style="text-align: center;">{{person.name}} - {{person.id}}</h1>
     <div style="display: flex;justify-content: center;">
         <div id="person-container">
             <form action="/admin/editperson/{{ person.id }}" method="post">
@@ -28,5 +29,6 @@
             </form>
         </div>
     </div>
+    {%endif%}
 </body>
 </html>

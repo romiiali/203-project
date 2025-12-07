@@ -3,34 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Add New Course</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    {% include 'admin-nav-bar.html' %}
+    {% include 'admin/admin-nav-bar.html' %}
     <h1 style="text-align: center;">Add a New Course</h1>
-    <div style="display: flex;justify-content: center;">
+    <div style="display: flex; justify-content: center;">
         <div id="person-container">
-            <form action="/admin/addcourse/" method="post">
+            <form action="/admin/addcourse" method="post">
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name">
+                <input type="text" id="name" name="name" required>
                 <br><br>
                 <label for="code">Code</label>
-                <input type="number" id="code" name="code">
+                <input type="text" id="code" name="code" required> 
                 <br><br>
-                <label for="Instructor">Instructor</label>
-                <input type="text" id="Instructor" name="Instructor">
+                <label for="instructor">Instructor</label>
+                <select id="instructor" name="instructor">
+                    <option value="">Select Instructor</option>
+                    {% for instructor in instructors %}
+                        <option value="{{ instructor.id }}">{{ instructor.name }}</option>
+                    {% endfor %}
+                </select>
                 <br><br>
-                <label for="TA">TA</label>
-                <input type="text" id="TA" name="TA">
+                <label for="ta">TA</label>
+                <select id="ta" name="ta">
+                    <option value="">Select TA</option>
+                    {% for ta in tas %}
+                        <option value="{{ ta.id }}">{{ ta.name }}</option>
+                    {% endfor %}
+                </select>
                 <br><br>
-                <label for="credits">Credit</label>
-                <input type="number" id="credits" name="credits">
+                <label for="credits">Credits</label>
+                <input type="number" id="credits" name="credits" min="1" max="5" value="3" required>
                 <br><br>
                 <label for="seats">Seat Numbers</label>
-                <input type="number" id="seats" name="seats">
+                <input type="number" id="seats" name="seats" min="1" max="100" value="30" required>
                 <br><br>
-                <input type="submit" value="Add" id="add-btn">
+                <label for="description">Description (Optional)</label>
+                <textarea id="description" name="description" rows="3"></textarea>
+                <br><br>
+                <label for="schedule">Schedule</label>
+                <input type="text" id="schedule" name="schedule" value="TBA">
+                <br><br>
+                <label for="department">Department</label>
+                <input type="text" id="department" name="department" value="General">
+                <br><br>
+                <input type="submit" value="Add Course" id="add-btn">
+                <a href="/admin/dashboard" style="margin-left: 20px;">
+                    <button type="button">Cancel</button>
+                </a>
             </form>
         </div>
     </div>

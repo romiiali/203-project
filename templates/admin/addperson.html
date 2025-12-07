@@ -7,22 +7,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    {% include 'admin-nav-bar.html' %}
+    {% include 'admin/admin-nav-bar.html' %}
     <h1 style="text-align: center;">Add a New Person</h1>
     <div style="display: flex;justify-content: center;">
         <div id="person-container">
-            <form action="/admin/addcourse/" method="post">
+            <form action="/admin/addperson" method="post">
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name">
                 <br><br>
                 <label for="id">ID</label>
                 <input type="number" id="id" name="id">
                 <br><br>
-                <label for="Role">Role</label>
-                <input type="text" id="Role" name="Role">
+                <label for="role">Role</label>
+                <select id="role" name="role">
+                    <option value="">Select Role</option>
+                    {% for role in roles %}
+                        <option value="{{role }}">{{ role }}</option>
+                    {% endfor %}
+                </select>
+                <br><br>
+                <label for="email">email</label>
+                <input type="email" id="email" name="email">
+                <br><br>
+                <label for="pass">password</label>
+                <input type="password" id="pass" name="pass">
                 <br><br>
                 <input type="submit" value="Add" id="add-btn">
             </form>
+
         </div>
     </div>
 </body>

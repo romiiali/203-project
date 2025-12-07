@@ -1,0 +1,383 @@
+/* Main Style.css - Earthy Theme */
+body {
+    font-family: Arial, sans-serif;
+    background-color: floralwhite;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+/* Container and Layout */
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.card {
+    background-color: burlywood;
+    border-radius: 10px;
+    border: 2px solid black;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background-color: #333;
+    color: floralwhite;
+    padding: 15px 20px;
+    border-bottom: 2px solid #666;
+    border-radius: 8px 8px 0 0;
+}
+
+.card-body {
+    padding: 20px;
+    background-color: wheat;
+}
+
+/* Tables */
+.table {
+    width: 100%;
+    background-color: wheat;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table th {
+    background-color: #333;
+    color: floralwhite;
+    padding: 12px 15px;
+    font-weight: bold;
+    border-bottom: 2px solid #666;
+}
+
+.table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #999;
+    background-color: wheat;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f5deb3;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    border: none;
+    border-bottom: 2px gray solid;
+    border-left: 2px gray solid;
+    transition: all 0.3s;
+}
+
+.btn:hover {
+    box-shadow: grey 0px 0px 8px;
+    transform: translateY(-2px);
+}
+
+.btn-primary {
+    background-color: #333;
+    color: floralwhite;
+}
+
+.btn-secondary {
+    background-color: #666;
+    color: floralwhite;
+}
+
+.btn-success {
+    background-color: #2e7d32;
+    color: white;
+}
+
+.btn-info {
+    background-color: #1976d2;
+    color: white;
+}
+
+.btn-warning {
+    background-color: #f57c00;
+    color: white;
+}
+
+.btn-outline-primary {
+    background-color: wheat;
+    color: #333;
+    border: 2px solid #333;
+}
+
+.btn-outline-success {
+    background-color: wheat;
+    color: #2e7d32;
+    border: 2px solid #2e7d32;
+}
+
+.btn-outline-info {
+    background-color: wheat;
+    color: #1976d2;
+    border: 2px solid #1976d2;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+/* Badges */
+.badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.bg-primary {
+    background-color: #333 !important;
+    color: floralwhite;
+}
+
+.bg-success {
+    background-color: #2e7d32 !important;
+    color: white;
+}
+
+.bg-info {
+    background-color: #1976d2 !important;
+    color: white;
+}
+
+.bg-light {
+    background-color: wheat !important;
+    color: #333;
+}
+
+/* Forms */
+.form-control {
+    background-color: floralwhite;
+    border: 1px solid #999;
+    border-radius: 5px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #333;
+    box-shadow: 0 0 0 2px rgba(51, 51, 51, 0.2);
+}
+
+.input-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.input-group-text {
+    background-color: #333;
+    color: floralwhite;
+    padding: 10px;
+    border: 1px solid #999;
+    border-right: none;
+    border-radius: 5px 0 0 5px;
+}
+
+/* Alerts */
+.alert {
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border: 1px solid transparent;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    color: #1565c0;
+    border-color: #bbdefb;
+}
+
+.alert-warning {
+    background-color: #fff3e0;
+    color: #e65100;
+    border-color: #ffe0b2;
+}
+
+.alert-success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-color: #c8e6c9;
+}
+
+/* Typography */
+.text-primary {
+    color: #333 !important;
+}
+
+.text-success {
+    color: #2e7d32 !important;
+}
+
+.text-muted {
+    color: #666 !important;
+}
+
+.text-white {
+    color: floralwhite !important;
+}
+
+.fw-bold {
+    font-weight: bold;
+}
+
+/* Grid System */
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+
+.col-md-4, .col-md-6 {
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.col-md-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+}
+
+.col-md-4 {
+    flex: 0 0 33.333%;
+    max-width: 33.333%;
+}
+
+.mb-1 { margin-bottom: 5px; }
+.mb-2 { margin-bottom: 10px; }
+.mb-3 { margin-bottom: 15px; }
+.mb-4 { margin-bottom: 20px; }
+.mb-5 { margin-bottom: 25px; }
+.mt-1 { margin-top: 5px; }
+.mt-2 { margin-top: 10px; }
+.mt-3 { margin-top: 15px; }
+.mt-4 { margin-top: 20px; }
+.mt-5 { margin-top: 25px; }
+.me-1 { margin-right: 5px; }
+.me-2 { margin-right: 10px; }
+.ms-1 { margin-left: 5px; }
+.ms-2 { margin-left: 10px; }
+.py-4 { padding-top: 20px; padding-bottom: 20px; }
+.py-5 { padding-top: 25px; padding-bottom: 25px; }
+.p-0 { padding: 0; }
+.p-4 { padding: 20px; }
+.ps-4 { padding-left: 20px; }
+
+/* Utility Classes */
+.d-flex {
+    display: flex;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-start {
+    text-align: left;
+}
+
+.text-end {
+    text-align: right;
+}
+
+.shadow-sm {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.shadow {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.border-top {
+    border-top: 1px solid #999;
+}
+
+.border-start {
+    border-left: 4px solid;
+}
+
+.border-info {
+    border-color: #1976d2 !important;
+}
+
+.border-primary {
+    border-color: #333 !important;
+}
+
+/* Icons */
+.fa-2x {
+    font-size: 2em;
+}
+
+.fa-3x {
+    font-size: 3em;
+}
+
+.fa-5x {
+    font-size: 5em;
+}
+
+/* Responsive Table */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Links */
+a {
+    color: #333;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Course Cards */
+.course-card {
+    background-color: wheat;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #999;
+    margin-bottom: 20px;
+}
+
+.course-card .card-title {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Assignment Submission Table */
+.assignment-table th {
+    background-color: #333;
+    color: floralwhite;
+}
+
+/* Profile Section */
+.profile-icon {
+    color: #666;
+}

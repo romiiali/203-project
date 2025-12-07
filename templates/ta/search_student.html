@@ -1,42 +1,50 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container mt-4">
-    <h3 class="text-success"><i class="fas fa-users me-2"></i> Search Student</h3>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Student</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h3 class="text-success">👥 Search Student</h3>
 
-    <div class="card bg-light border-0 mb-4">
-        <div class="card-body">
-            <form method="POST" class="d-flex gap-2">
-                <input type="text" name="query" class="form-control" placeholder="Enter Student Name or Email" required>
-                <button type="submit" class="btn btn-success">Search</button>
-            </form>
+        <div class="card bg-light mb-4">
+            <div class="card-body">
+                <form method="POST" class="d-flex gap-2">
+                    <input type="text" name="query" class="form-control" placeholder="Enter Student Name or Email" required>
+                    <button type="submit" class="btn btn-success">Search</button>
+                </form>
+            </div>
         </div>
-    </div>
 
-    {% if results %}
-    <table class="table table-hover bg-white shadow-sm">
-        <thead class="table-light">
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for student in results %}
-            <tr>
-                <td class="fw-bold">{{ student.name }}</td>
-                <td>{{ student.email }}</td>
-                <td>
-                    <a href="/ta/student/{{ student.id }}" class="btn btn-sm btn-outline-success">
-                        <i class="fas fa-user-circle"></i> View Profile
-                    </a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    {% elif request.method == 'POST' %}
-    <div class="alert alert-warning">No students found.</div>
-    {% endif %}
-</div>
-{% endblock %}
+        {% if results %}
+        <table class="table table-hover bg-white shadow-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in results %}
+                <tr>
+                    <td class="fw-bold">{{ student.name }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>
+                        <a href="/ta/student/{{ student.id }}" class="btn btn-sm btn-outline-success">
+                            👤 View Profile
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% elif request.method == 'POST' %}
+        <div class="alert alert-warning">No students found.</div>
+        {% endif %}
+    </div>
+</body>
+</html>

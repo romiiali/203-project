@@ -266,7 +266,7 @@ SCRS follows a **modular client–server architecture**:
 
 ## 👨‍💻 Team Members
 
-Course: **Software Engineering Project – Phase 2**  
+Course: **Software Engineering Project **  
 Instructor: **Mohameds Sami Rakha**
 
 - 👩‍💻 Mariam Ahmed Maher – 202400733 – s-mariam.maher@zewailcity.edu.eg  

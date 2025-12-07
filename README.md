@@ -33,7 +33,7 @@ It allows:
 - Professors and Teaching Assistants (TAs) to manage course content, assignments, announcements, and grading.
 - Admins to manage users, courses, and overall system operations.
 
-The system is developed as part of the **Software Engineering Project – Phase 2** using **Flask, HTML, and CSS**.
+The system is developed as part of the **Software Engineering Project ** using **Flask, HTML, and CSS**.
 
 ---
 

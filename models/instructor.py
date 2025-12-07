@@ -1,4 +1,5 @@
 from .user import User
+from .courses import Course
 
 class Instructor(User):
     def __init__(self, id, name, email, password):
@@ -12,24 +13,24 @@ class Instructor(User):
         return False
     
     def get_teaching_courses(self):
-        from courses import EnhancedCourse
+        from courses import Course
         courses = []
         for course_id in self.teaching_courses:
-            course = EnhancedCourse.get_by_id(course_id)
+            course = Course.get_by_id(course_id)
             if course:
                 courses.append(course)
         return courses
     
     def create_assignment(self, course_id, title, description, due_date):
-        from courses import EnhancedCourse
-        course = EnhancedCourse.get_by_id(course_id)
+        from courses import Course
+        course = Course.get_by_id(course_id)
         if course:
             return course.add_assignment(title, description, due_date)
         return None
     
     def create_announcement(self, course_id, title, content):
-        from courses import EnhancedCourse
-        course = EnhancedCourse.get_by_id(course_id)
+        from courses import Course
+        course = Course.get_by_id(course_id)
         if course:
             return course.add_announcement(title, content, self.id)
         return None

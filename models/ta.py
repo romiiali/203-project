@@ -1,4 +1,5 @@
 from .user import User
+from .courses import Course
 
 class TA(User):
     def __init__(self, id, name, email, password):
@@ -12,10 +13,10 @@ class TA(User):
         return False
     
     def get_assigned_courses(self):
-        from courses import EnhancedCourse
+        from courses import Course
         courses = []
         for course_id in self.assigned_courses:
-            course = EnhancedCourse.get_by_id(course_id)
+            course = Course.get_by_id(course_id)
             if course:
                 courses.append(course)
         return courses

@@ -46,7 +46,7 @@ def view_course(course_id):
     
     return render_template('admin/viewcourse.html', course=course, students=students)
 
-@admin_bp.route('/editcourse/<int:course_id>', methods=['GET', 'POST'])
+@admin_bp.route('/editcourse/<int:course_code>', methods=['GET', 'POST'])
 def edit_course(course_id):
     if 'user_id' not in session or session.get('role') != 'admin':
         return redirect('/login')

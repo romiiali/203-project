@@ -1,4 +1,5 @@
 from .user import User
+from .courses import Course
 
 class Student(User):
     def __init__(self, id, name, email, password, major, level):
@@ -29,8 +30,8 @@ class Student(User):
         if course_id in self.enrolled_courses:
             self.enrolled_courses.remove(course_id)
             
-            from courses import EnhancedCourse
-            course = EnhancedCourse.get_by_id(course_id)
+            from courses import Course
+            course = Course.get_by_id(course_id)
             if course:
                 if self.id in course.enrolled_students:
                     course.enrolled_students.remove(self.id)
@@ -39,10 +40,10 @@ class Student(User):
         return False, "Not enrolled in this course"
     
     def get_enrolled_courses(self):
-        from courses import EnhancedCourse
+        from courses import Course
         courses = []
         for course_id in self.enrolled_courses:
-            course = EnhancedCourse.get_by_id(course_id)
+            course = Course.get_by_id(course_id)
             if course:
                 courses.append(course)
         return courses

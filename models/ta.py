@@ -1,4 +1,4 @@
-from user import User
+from .user import User
 
 class TA(User):
     def __init__(self, id, name, email, password):

@@ -1,4 +1,4 @@
-from user import User
+from .user import User
 
 class Student(User):
     def __init__(self, id, name, email, password, major, level):
@@ -8,8 +8,8 @@ class Student(User):
         self.enrolled_courses = []
     
     def enroll_course(self, course_id):
-        from courses import EnhancedCourse
-        course = EnhancedCourse.get_by_id(course_id)
+        from courses import Course
+        course = Course.get_by_id(course_id)
         
         if not course:
             return False, "Course not found"

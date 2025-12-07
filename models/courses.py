@@ -1,3 +1,6 @@
+from .user import User
+from .student import Student
+
 class Course:
     def __init__(self, id, code, name, description=None, instructor_id=None, ta_id=None, 
                  credits=3, max_seats=30, schedule="TBA", department="General"):

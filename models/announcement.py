@@ -1,3 +1,6 @@
+
+from .user import User
+
 class Announcement:
     def __init__(self, id, title, content, poster_id, course_id):
         self.id = id

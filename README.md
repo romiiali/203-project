@@ -4,7 +4,7 @@ A smart web platform to manage course registration, schedules, assignments, and 
 
 ---
 
-## 📘 Table of Contents
+##  Table of Contents
 
 - [Overview](#-overview)
 - [Features](#-features)
@@ -23,7 +23,7 @@ A smart web platform to manage course registration, schedules, assignments, and 
 
 ---
 
-## 📝 Overview
+## -- Overview
 
 The **Smart Course Registration System (SCRS)** is a web-based platform that digitizes the course registration process in a university setting.
 
@@ -37,9 +37,9 @@ The system is developed as part of the **Software Engineering Project – Phase 
 
 ---
 
-## ✨ Features
+## --- Features
 
-### 🎓 Student
+### -Student
 
 - Secure register/login.
 - View available courses with:
@@ -54,7 +54,7 @@ The system is developed as part of the **Software Engineering Project – Phase 
 - View assignment and course grades.
 - Receive email reminders (e.g., upcoming classes, deadlines).
 
-### 👨‍🏫 Professor / Instructor
+### - Professor / Instructor
 
 - Secure login.
 - View assigned courses.
@@ -65,7 +65,7 @@ The system is developed as part of the **Software Engineering Project – Phase 
 - Post course announcements (e.g., room changes, exam dates).
 - Assign TAs and manage their permissions.
 
-### 🧑‍🏫 Teaching Assistant (TA)
+### -- Teaching Assistant (TA)
 
 - Secure login.
 - View courses they assist.
@@ -73,7 +73,7 @@ The system is developed as part of the **Software Engineering Project – Phase 
 - (If allowed) post announcements and assignments.
 - (If allowed) grade student submissions and update grades.
 
-### 🛠️ Admin
+### -- Admin
 
 - Secure login.
 - Manage users:
@@ -89,7 +89,7 @@ The system is developed as part of the **Software Engineering Project – Phase 
 
 ---
 
-## 🧱 System Architecture
+## -- System Architecture
 
 SCRS follows a **modular client–server architecture**:
 
@@ -115,7 +115,7 @@ SCRS follows a **modular client–server architecture**:
 
 ---
 
-## 👥 User Roles
+## - User Roles
 
 | Role       | Description                                                                 |
 |-----------|-----------------------------------------------------------------------------|
@@ -126,7 +126,7 @@ SCRS follows a **modular client–server architecture**:
 
 ---
 
-## 🧰 Tech Stack
+## -- Tech Stack
 
 - **Frontend:** HTML, CSS  
 - **Backend:** Python (Flask)  
@@ -138,7 +138,7 @@ SCRS follows a **modular client–server architecture**:
 
 ---
 
-## ✅ Functional Requirements
+## -- Functional Requirements
 
 ### Students
 
@@ -190,7 +190,7 @@ SCRS follows a **modular client–server architecture**:
 
 ---
 
-## 🔐 Non-Functional Requirements
+## - Non-Functional Requirements
 
 - **Usability**
   - Simple and intuitive web interface.
@@ -220,7 +220,7 @@ SCRS follows a **modular client–server architecture**:
 
 ---
 
-## 🧩 Use Cases
+## -- Use Cases
 
 ### Main Actors
 
@@ -245,7 +245,7 @@ SCRS follows a **modular client–server architecture**:
 
 ---
 
-## 🗂️ Core Data Entities
+## -- Core Data Entities
 
 | Entity       | Attributes                                                                                      |
 |-------------|--------------------------------------------------------------------------------------------------|
@@ -264,15 +264,15 @@ SCRS follows a **modular client–server architecture**:
 
 ---
 
-## 👨‍💻 Team Members
+## - Team Members
 
 Course: **Software Engineering Project **  
 Instructor: **Mohameds Sami Rakha**
 
-- 👩‍💻 Mariam Ahmed Maher – 202400733 – s-mariam.maher@zewailcity.edu.eg  
-- 👩‍💻 Farida Ehab  – 202201509 – s-farida.fouad@zewailcity.edu.eg  
-- 👩‍💻 Elaliaa Elmoez  – 202402473 – s-elaliaa.kotb@zewailcity.edu.eg  
-- 👩‍💻 Rahma Ali – 202400365 – s-rahma.anwar@zewailcity.edu.eg  
+- Mariam Ahmed Maher – 202400733 – s-mariam.maher@zewailcity.edu.eg  
+- Farida Ehab  – 202201509 – s-farida.fouad@zewailcity.edu.eg  
+- Elaliaa Elmoez  – 202402473 – s-elaliaa.kotb@zewailcity.edu.eg  
+- Rahma Ali – 202400365 – s-rahma.anwar@zewailcity.edu.eg  
 
 ---
 

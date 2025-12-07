@@ -11,7 +11,7 @@
     {%if person %}
     <h1 style="text-align: center;">{{person.name}} - {{person.id}}</h1>
     <div style="display: flex;justify-content: center;">
-        <div id="person-container">
+        <div id="person-container-edit">
             <form action="/admin/editperson/{{ person.id }}" method="post">
                 <label for="name">Change Name</label>
                 <input type="text" id="name" name="name">

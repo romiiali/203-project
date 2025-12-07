@@ -9,28 +9,7 @@
 <body>
     {% include 'admin/admin-nav-bar.html' %}
     <h1 style="text-align: center;">Admin Dashboard</h1>
-    
-    <div style="display: flex; justify-content: center; margin: 20px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <div style="padding: 20px; background-color: burlywood; border-radius: 10px;">
-                <h3>Total Courses</h3>
-                <h2>{{ total_courses }}</h2>
-            </div>
-            <div style="padding: 20px; background-color: burlywood; border-radius: 10px;">
-                <h3>Total Students</h3>
-                <h2>{{ total_students }}</h2>
-            </div>
-            <div style="padding: 20px; background-color: burlywood; border-radius: 10px;">
-                <h3>Total Instructors</h3>
-                <h2>{{ total_instructors }}</h2>
-            </div>
-            <div style="padding: 20px; background-color: burlywood; border-radius: 10px;">
-                <h3>Total TAs</h3>
-                <h2>{{ total_tas }}</h2>
-            </div>
-        </div>
-    </div>
-    
+
     <div style="display: flex; justify-content: center; margin: 40px;">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
             <div id="option">
@@ -44,7 +23,7 @@
                 </a>
             </div>
             <div id="option">
-                <a href="/admin/searchperson">
+                <a href="/admin/searchpeople">
                     <h2 style="margin: 5px;">Search People</h2>
                 </a>
             </div>

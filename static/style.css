@@ -135,6 +135,7 @@ body{
 }
 #person-container{
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     margin-top: 20px;
@@ -176,7 +177,7 @@ body{
 #add-btn:hover{
     box-shadow: grey 0px 0px 8px;
 }
-#person-container{
+#person-container-edit{
     margin: 5px;
     padding: 10px;
     border-bottom: 1px solid gray;

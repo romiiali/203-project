@@ -99,7 +99,7 @@ class Course:
                 
             # Search in instructor info
             if course.instructor_id:
-                from user import User
+                from models.user import User
                 instructor = User.get_by_id(course.instructor_id)
                 if instructor and search_term in instructor.name.lower():
                     matching_courses.append(course)
@@ -107,7 +107,7 @@ class Course:
             
             # Search in TA info
             if course.ta_id:
-                from user import User
+                from models.user import User
                 ta = User.get_by_id(course.ta_id)
                 if ta and search_term in ta.name.lower():
                     matching_courses.append(course)

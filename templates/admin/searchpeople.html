@@ -19,64 +19,64 @@
             <button type="submit" id="course-search-button">Search</button>
             {% if search_query %}
                 <a href="/admin/searchpeople">
-                    <button type="button" id="clear-search-button">Clear Search</button>
+                    <button type="button" id="clear-search-button" style="position: relative; bottom: 10px; margin: 10px;font-size: medium;padding-bottom: 5px;padding-top: 5px;">Clear Search</button>
                 </a>
             {% endif %}
         </form>
         
         <div style="display: flex; justify-content: center; margin-top: 20px;">
-            <div id="person-container" style="width: 80%;">
-                {% if people %}
-                    {% for person in people %}
-                        <div style="margin: 10px 0; padding: 15px; background-color: wheat; border-radius: 10px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <h3 style="margin: 0;">
-                                        {{ person.name }} --- ({{ person.role|capitalize }})
-                                    </h3>
-                                    <p style="margin: 5px 0;">
-                                        <strong>ID:</strong> {{ person.id }}
-                                        {% if person.email %}
-                                            | <strong>Email:</strong> {{ person.email }}
-                                        {% endif %}
-                                    </p>
-                                    {% if person.major %}
-                                        <p style="margin: 5px 0;">
-                                            <strong>Major:</strong> {{ person.major }}
-                                        </p>
-                                    {% endif %}
-                                    {% if person.level %}
-                                        <p style="margin: 5px 0;">
-                                            <strong>Level:</strong> {{ person.level }}
-                                        </p>
-                                    {% endif %}
-                                </div>
-                                <div>
-                                    <a href="/admin/editperson/{{ person.id }}">
-                                        <button id="edit-btn">Edit</button>
-                                    </a>
-                                    <a href="/admin/deleteperson/{{ person.id }}" 
-                                       onclick="return confirm('Are you sure you want to delete {{ person.name }}?')"
-                                       style="margin-left: 10px;">
-                                        <button style="background-color: #ff6b6b;">Delete</button>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <div style="text-align: center; padding: 40px; background-color: wheat; border-radius: 10px;">
-                        <p style="font-size: 18px;">
-                            {% if search_query %}
-                                No people found for "{{ search_query }}"
-                            {% else %}
-                                No people found in the system
+    {% if people %}
+        <div id="person-container" style="width: 80%;">
+            {% for person in people %}
+                <div style="margin: 10px 0; padding: 15px; background-color: wheat; border-radius: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h3 style="margin: 0;">
+                                {{ person.name }} --- ({{ person.role|capitalize }})
+                            </h3>
+                            <p style="margin: 5px 0;">
+                                <strong>ID:</strong> {{ person.id }}
+                                {% if person.email %}
+                                    | <strong>Email:</strong> {{ person.email }}
+                                {% endif %}
+                            </p>
+                            {% if person.major %}
+                                <p style="margin: 5px 0;">
+                                    <strong>Major:</strong> {{ person.major }}
+                                </p>
                             {% endif %}
-                        </p>
+                            {% if person.level %}
+                                <p style="margin: 5px 0;">
+                                    <strong>Level:</strong> {{ person.level }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <a href="/admin/editperson/{{ person.id }}">
+                                <button id="edit-btn" style="position: relative; left: 0; margin-left: 10px;">Edit</button>
+                            </a>
+                            <a href="/admin/deleteperson/{{ person.id }}" 
+                               onclick="return confirm('Are you sure you want to delete {{ person.name }}?')"
+                               style="margin-left: 10px;">
+                                <button style="background-color: #ff6b6b;">Delete</button>
+                            </a>
+                        </div>
                     </div>
-                {% endif %}
-            </div>
+                </div>
+            {% endfor %}
         </div>
+    {% else %}
+        <div style="text-align: center; padding: 40px; background-color: wheat; border-radius: 10px; width: 80%; margin: 0 auto;">
+            <p style="font-size: 18px;">
+                {% if search_query %}
+                    No people found for "{{ search_query }}"
+                {% else %}
+                    No people found in the system
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+</div>
     </div>
     
     <script>

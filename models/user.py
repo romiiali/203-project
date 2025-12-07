@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 class User:
     def __init__(self, id, name, email, password, role):
         self.id = id
@@ -33,40 +32,41 @@ class User:
         for user in users:
             if user.id == user_id:
                 return user
-=======
-class User:
-    def __init__(self, id, name, email, password, role):
-        self.id = id
-        self.name = name
-        self.email = email
-        self.password = password
-        self.role = role
+        return None
     
     @staticmethod
-    def login(email, password):
+    def search_users_by_role(role):
         users = [
             User(1, "John Doe", "john@student.edu", "pass123", "student"),
             User(2, "Dr. Sarah Johnson", "sarah@instructor.edu", "pass123", "instructor"),
             User(3, "Alex Chen", "alex@ta.edu", "pass123", "ta"),
-            User(4, "Admin User", "admin@university.edu", "pass123", "admin")
+            User(4, "Admin User", "admin@university.edu", "pass123", "admin"),
+            User(5, "Jane Smith", "jane@student.edu", "pass123", "student"),
+            User(6, "Mike Johnson", "mike@student.edu", "pass123", "student")
         ]
         
-        for user in users:
-            if user.email == email and user.password == password:
-                return user
-        return None
+        return [user for user in users if user.role == role]
     
     @staticmethod
-    def get_by_id(user_id):
+    def search_users(query=""):
         users = [
             User(1, "John Doe", "john@student.edu", "pass123", "student"),
             User(2, "Dr. Sarah Johnson", "sarah@instructor.edu", "pass123", "instructor"),
             User(3, "Alex Chen", "alex@ta.edu", "pass123", "ta"),
-            User(4, "Admin User", "admin@university.edu", "pass123", "admin")
+            User(4, "Admin User", "admin@university.edu", "pass123", "admin"),
+            User(5, "Jane Smith", "jane@student.edu", "pass123", "student"),
+            User(6, "Mike Johnson", "mike@student.edu", "pass123", "student")
         ]
         
+        if not query:
+            return users
+        
+        query = query.lower()
+        results = []
         for user in users:
-            if user.id == user_id:
-                return user
->>>>>>> 20617a8a8979aaf50a951e6b8ac6723f6f13f32b
-        return None
+            if (query in user.name.lower() or 
+                query in user.email.lower() or 
+                query in user.role.lower()):
+                results.append(user)
+        
+        return results

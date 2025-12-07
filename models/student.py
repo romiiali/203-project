@@ -1,5 +1,4 @@
-from .user import User
-from .courses import Course
+from models.user import User
 
 class Student(User):
     def __init__(self, id, name, email, password, major, level):
@@ -9,7 +8,7 @@ class Student(User):
         self.enrolled_courses = []
     
     def enroll_course(self, course_id):
-        from courses import Course
+        from models.courses import Course
         course = Course.get_by_id(course_id)
         
         if not course:
@@ -30,7 +29,7 @@ class Student(User):
         if course_id in self.enrolled_courses:
             self.enrolled_courses.remove(course_id)
             
-            from courses import Course
+            from models.courses import Course
             course = Course.get_by_id(course_id)
             if course:
                 if self.id in course.enrolled_students:
@@ -40,7 +39,7 @@ class Student(User):
         return False, "Not enrolled in this course"
     
     def get_enrolled_courses(self):
-        from courses import Course
+        from models.courses import Course
         courses = []
         for course_id in self.enrolled_courses:
             course = Course.get_by_id(course_id)
@@ -52,7 +51,7 @@ class Student(User):
         return course_id in self.enrolled_courses
     
     def get_assignment_status(self, assignment_id):
-        from assignment import Assignment
+        from models.assignment import Assignment
         assignment = Assignment.get_by_id(assignment_id)
         if assignment:
             return assignment.get_submission_status(self.id)

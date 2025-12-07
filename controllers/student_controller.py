@@ -18,7 +18,7 @@ def dashboard():
     
     enrolled_courses = student.get_enrolled_courses()
     
-    return render_template('student/dashboard.html', 
+    return render_template('student/student-dashboard.html', 
                          student=student, 
                          enrolled_courses=enrolled_courses)
 
@@ -30,7 +30,7 @@ def view_courses():
     student = Student.get_by_id(session['user_id'])
     enrolled_courses = student.get_enrolled_courses()
     
-    return render_template('student/enrolled_courses.html', 
+    return render_template('student/student-enrolled-courses.html', 
                          student=student, 
                          courses=enrolled_courses)
 
@@ -45,7 +45,7 @@ def search_courses():
     
     enrolled_course_ids = [course.id for course in student.get_enrolled_courses()]
     
-    return render_template('student/search_courses.html', 
+    return render_template('student/student-search.html', 
                          student=student, 
                          courses=courses, 
                          enrolled_course_ids=enrolled_course_ids,
@@ -94,7 +94,7 @@ def view_course(course_id):
         assignment.submitted = status['submitted']
         assignment.grade = status['grade']
     
-    return render_template('student/view_course.html', 
+    return render_template('student/student-view-course.html', 
                          student=student, 
                          course=course,
                          announcements=announcements,
@@ -114,7 +114,7 @@ def view_announcements(course_id):
     
     announcements = course.get_announcements()
     
-    return render_template('student/announcements.html', 
+    return render_template('student/student-announcements.html', 
                          student=student, 
                          course=course,
                          announcements=announcements)
@@ -140,7 +140,7 @@ def view_assignments(course_id):
         assignment.grade = status['grade']
         assignment.submission_timestamp = status['timestamp']
     
-    return render_template('student/assignments.html', 
+    return render_template('student/student-assignments.html', 
                          student=student, 
                          course=course,
                          assignments=assignments)
@@ -175,7 +175,7 @@ def submit_assignment(assignment_id):
         else:
             flash("Submission cannot be empty", "error")
     
-    return render_template('student/submit_assignment.html', 
+    return render_template('student/student-submit-assignment.html', 
                          student=student, 
                          assignment=assignment,
                          course=course)

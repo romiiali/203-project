@@ -7,6 +7,8 @@ from controllers.instructor_controller import instructor_bp
 
 app = Flask(__name__)
 
+app.secret_key = 'your-key-here'
+
 # Register blueprints
 app.register_blueprint(auth_bp)
 app.register_blueprint(student_bp)

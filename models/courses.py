@@ -1,5 +1,4 @@
-from .user import User
-from .student import Student
+from models.user import User
 
 class Course:
     def __init__(self, id, code, name, description=None, instructor_id=None, ta_id=None, 

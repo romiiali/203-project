@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.code }} - {{ course.name }}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1 style="text-align: center;">{{ course.code }} - {{ course.name }}</h1>
+    
+    <div id="container1">
+        <div style="text-align: center; margin-bottom: 30px;">
+            <a href="/student/course/{{ course.id }}/announcements" class="btn-large">View Announcements</a>
+            <a href="/student/course/{{ course.id }}/assignments" class="btn-large">View Assignments</a>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <h3>Course Information</h3>
+            <p><strong>Instructor:</strong> 
+                {% if course.instructor_id %}
+                    {% set instructor = course.get_instructor() %}
+                    {{ instructor.name if instructor else 'Not Assigned' }}
+                {% else %}
+                    Not Assigned
+                {% endif %}
+            </p>
+            <p><strong>TA:</strong> 
+                {% if course.ta_id %}
+                    {% set ta = course.get_ta() %}
+                    {{ ta.name if ta else 'Not Assigned' }}
+                {% else %}
+                    Not Assigned
+                {% endif %}
+            </p>
+            <p><strong>Schedule:</strong> {{ course.schedule }}</p>
+            <p><strong>Credits:</strong> {{ course.credits }}</p>
+            <p><strong>Department:</strong> {{ course.department }}</p>
+            <p><strong>Description:</strong> {{ course.description }}</p>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <h3>Recent Announcements</h3>
+            {% if announcements %}
+                {% for announcement in announcements[:3] %}
+                    <div class="announcement">
+                        <h4>{{ announcement.title }}</h4>
+                        <p>{{ announcement.content[:100] }}{% if announcement.content|length > 100 %}...{% endif %}</p>
+                        <small>{{ announcement.timestamp }}</small>
+                    </div>
+                {% endfor %}
+                {% if announcements|length > 3 %}
+                    <p style="text-align: center;">
+                        <a href="/student/course/{{ course.id }}/announcements">View all {{ announcements|length }} announcements</a>
+                    </p>
+                {% endif %}
+            {% else %}
+                <p>No announcements yet.</p>
+            {% endif %}
+        </div>
+        
+        <div>
+            <h3>Upcoming Assignments</h3>
+            {% if assignments %}
+                {% for assignment in assignments[:3] %}
+                    <div class="assignment">
+                        <h4>{{ assignment.title }}</h4>
+                        <p>{{ assignment.description[:100] }}{% if assignment.description|length > 100 %}...{% endif %}</p>
+                        <p><strong>Due:</strong> {{ assignment.due_date }}</p>
+                        <a href="/student/assignment/{{ assignment.id }}/submit">Submit Assignment</a>
+                    </div>
+                {% endfor %}
+                {% if assignments|length > 3 %}
+                    <p style="text-align: center;">
+                        <a href="/student/course/{{ course.id }}/assignments">View all {{ assignments|length }} assignments</a>
+                    </p>
+                {% endif %}
+            {% else %}
+                <p>No assignments yet.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <a href="/student/courses" style="margin-right: 15px;">Back to My Courses</a>
+        <a href="/student/dashboard">Dashboard</a>
+    </div>
+</body>
+</html>

@@ -13,7 +13,7 @@ class Announcement(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
     
     # Relationship
-    poster = db.relationship('User', backref='announcements')
+    poster_user = db.relationship('User', backref='announcements')
     
     @staticmethod
     def get_by_course(course_id):

@@ -17,7 +17,7 @@ app.config.from_object(Config)
 # Initialize extensions with app
 db.init_app(app)
 
-app.secret_key = 'your-key-here'
+app.secret_key = 'dev-secret-key-change-this'
 
 # Register blueprints
 app.register_blueprint(auth_bp)

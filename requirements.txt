@@ -9,3 +9,10 @@ Flask-SQLAlchemy
 pyodbc
 python-dotenv
 SQLAlchemy
+
+pytest
+pytest-flask
+pytest-mock
+pytest-cov
+factory-boy
+Faker

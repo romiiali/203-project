@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: floralwhite;
+    background-color: wheat;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,8 +13,19 @@ body {
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    width: 350px;
-    border: 2px solid black;
+    /* width: 350px;
+    border: 2px solid black; */
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.login-container:hover {
+    box-shadow: grey 0px 0px 12px;
+    transition: ease-out 0.3s;
+}
+.form-container {
+    width: 70%;
 }
 
 h1 {

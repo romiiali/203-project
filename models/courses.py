@@ -91,6 +91,17 @@ class Course(db.Model):
             return True
         return False
     
+    def drop_student(self, student_id):
+        """Drop a student from this course"""
+        from models.enrollment import Enrollment
+        enrollment = Enrollment.query.filter_by(student_id=student_id, course_id=self.id).first()
+        if enrollment:
+            db.session.delete(enrollment)
+            self.seats_left += 1
+            db.session.commit()
+            return True
+        return False
+    
     def to_dict(self):
         """Convert course to dictionary"""
         instructor_name = None

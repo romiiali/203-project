@@ -1,7 +1,6 @@
+cat > .gitignore << 'EOF'
 # Python
 __pycache__/
-/controllers/__pycache__/
-/models/__pycache__/
 *.pyc
 *.pyo
 *.pyd
@@ -15,6 +14,7 @@ env/
 *.swp
 *.swo
 
-# Environment variables
+# Environment
 .env
 .env.local
+EOF

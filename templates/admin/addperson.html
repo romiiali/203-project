@@ -15,29 +15,20 @@
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name">
                 <br><br>
-                <label for="id">ID</label>
-                <input type="number" id="id" name="id">
-                <br><br>
                 <label for="role">Role</label>
                 <select id="role" name="role">
-                    <option value="">Select Role</option>
-                    {% for role in roles %}
-                        <option value="{{role }}">{{ role }}</option>
+                    <option value="role">Select Role</option>
+                    {% for role_option in ['Student', 'Instructor', 'TA', 'Admin'] %}
+                        <option value="{{ role_option }}">{{ role_option }}</option>
                     {% endfor %}
                 </select>
                 <br><br>
-                <label for="email">email</label>
-                <input type="email" id="email" name="email">
-                <br><br>
-                <label for="pass">password</label>
-                <input type="password" id="pass" name="pass">
-                <br><br>
                 <!-- Add these fields in the form -->
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" id="email" name="email">
                 <br><br>
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password">
                 <br><br>
                 <input type="submit" value="Add" id="add-btn">
             </form>

@@ -18,15 +18,15 @@
                     {{ course.name }} ({{ course.code }})
                 </p>
                 <p><strong>Instructor:</strong> 
-                    {% if instructor %}
-                        {{ instructor.name }}
+                    {% if course.instructor %}
+                        {{ course.instructor.name }}
                     {% else %}
                         Not assigned
                     {% endif %}
                 </p>
                 <p><strong>TA:</strong> 
-                    {% if ta %}
-                        {{ ta.name }}
+                    {% if course.ta %}
+                        {{ course.ta.name }}
                     {% else %}
                         Not assigned
                     {% endif %}
@@ -61,6 +61,10 @@
                         <p><strong>Major:</strong> {{ student.major }}</p>
                         <p><strong>Level:</strong> {{ student.level }}</p>
                         <p><strong>Email:</strong> {{ student.email }}</p>
+
+                        <a href="/admin/dropstudent/{{course.id}}/{{student.id}}">
+                            <button style="background-color: #ff6b6b;">Drop Person</button>
+                        </a>
                     </div>
                 {% endfor %}
             {% else %}

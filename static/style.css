@@ -2,8 +2,8 @@
     padding: 5px;
     width: 150px;
     margin: 10px;
-    background-color: black;
-    color: floralwhite;
+    background-color: rgb(142, 89, 21);
+    color: wheat;
 }
 #search-bar{
     display: flex;
@@ -31,6 +31,18 @@
     bottom: 10px;
 }
 #course-search-button:hover{
+    box-shadow: grey 0px 0px 5px;
+
+}
+#clear-search-button{
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 10px;
+    position: relative;
+    bottom: 10px;
+}
+#clear-search-button:hover{
     box-shadow: grey 0px 0px 5px;
 
 }

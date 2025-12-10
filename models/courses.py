@@ -1,4 +1,5 @@
 from extensions import db
+from models.enrollment import Enrollment
 
 class Course(db.Model):
     __tablename__ = 'courses'

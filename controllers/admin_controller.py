@@ -157,8 +157,8 @@ def add_course():
                 description=description if description else f"Course: {name}",
                 instructor_id=int(instructor_id) if instructor_id else None,
                 ta_id=int(ta_id) if ta_id else None,
-                credits=credits_int,
-                max_seats=max_seats_int,
+                credits=credits,
+                max_seats=max_seats,
                 schedule=schedule,
                 department=department
             )

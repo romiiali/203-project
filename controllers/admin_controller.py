@@ -122,18 +122,26 @@ def add_course():
         instructors = User.query.filter_by(role='instructor').all()
         tas = User.query.filter_by(role='ta').all()
         
-        return render_template('admin/addcourse.html', instructors=instructors, tas=tas)
+        return render_template('admin/addcourse.html', 
+                             instructors=instructors, 
+                             tas=tas)
     
     if request.method == 'POST':
-        code = request.form.get('code')
-        name = request.form.get('name')
-        description = request.form.get('description')
-        instructor_id = request.form.get('instructor_id')
-        ta_id = request.form.get('ta_id')
-        credits = request.form.get('credits')
-        max_seats = request.form.get('max_seats')
-        schedule = request.form.get('schedule')
-        department = request.form.get('department')
+        # Get form data
+        code = request.form.get('code', '').strip()
+        name = request.form.get('name', '').strip()
+        description = request.form.get('description', '').strip()
+        instructor_id = request.form.get('instructor', '')
+        ta_id = request.form.get('ta', '')
+        credits = request.form.get('credits', '')
+        max_seats = request.form.get('seats', '')
+        schedule = request.form.get('schedule', 'TBA').strip()
+        department = request.form.get('department', 'General').strip()
+        
+        # Validate required fields
+        if not code or not name or not credits or not max_seats:
+            flash('Please fill all required fields (Name, Code, Credits, Seats)', 'error')
+            return redirect('/admin/addcourse')
         
         if code and name and credits and max_seats:
             # Check if course code already exists
@@ -146,11 +154,11 @@ def add_course():
             new_course = Course(
                 code=code,
                 name=name,
-                description=description,
+                description=description if description else f"Course: {name}",
                 instructor_id=int(instructor_id) if instructor_id else None,
                 ta_id=int(ta_id) if ta_id else None,
-                credits=int(credits),
-                max_seats=int(max_seats),
+                credits=credits_int,
+                max_seats=max_seats_int,
                 schedule=schedule,
                 department=department
             )

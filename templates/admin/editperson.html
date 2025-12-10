@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    {% include 'admin-nav-bar.html' %}
-    <h1 style="text-align: center;">Person Name - ID</h1>
+    {% include 'admin/admin-nav-bar.html' %}
+    {%if person %}
+    <h1 style="text-align: center;">{{person.name}} - {{person.id}}</h1>
     <div style="display: flex;justify-content: center;">
-        <div id="person-container">
+        <div id="person-container-edit">
             <form action="/admin/editperson/{{ person.id }}" method="post">
                 <label for="name">Change Name</label>
                 <input type="text" id="name" name="name">
@@ -36,5 +37,6 @@
             </form>
         </div>
     </div>
+    {%endif%}
 </body>
 </html>

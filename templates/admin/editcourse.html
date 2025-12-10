@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    {% include 'admin-nav-bar.html' %}
-    <h1 style="text-align: center;">Course Name - code</h1>
+    {% include 'admin/admin-nav-bar.html' %}
+    <h1 style="text-align: center;">{{course.name}} - {{course.code}}</h1>
     <div style="display: flex;justify-content: center;">
         <div id="person-container">
             <form action="/admin/editcourse/{{ course.code }}" method="post">

@@ -42,6 +42,16 @@ class User(db.Model):
         return None
     
     @staticmethod
+    def get_all():
+        
+        return  [
+                User(1, "John Doe", "john@student.edu", "pass123", "student"),
+                User(2, "Dr. Sarah Johnson", "sarah@instructor.edu", "pass123", "instructor"),
+                User(3, "Alex Chen", "alex@ta.edu", "pass123", "ta"),
+                User(4, "Admin User", "admin@university.edu", "pass123", "admin")
+            ]
+
+    @staticmethod
     def get_by_id(user_id):
         """Get user by ID"""
         return User.query.get(user_id)

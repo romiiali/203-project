@@ -3,36 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Course</title>
-    <link rel="stylesheet" href="style.css">
+    <title>View Course - {{ course.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body style="padding: 50px;background-color: burlywood;">
-    {% include 'admin-nav-bar.html' %}
+<body style="padding: 50px; background-color: burlywood;">
+    {% include 'admin/admin-nav-bar.html' %}
+    
     <h1 style="text-align: center;">View Course</h1>
-    {%if course%}
+    
+    {% if course %}
         <div id="course-info">
             <div id="course-col-1">
-                <p style="font-weight: bold;font-size: x-large;">{{ course.name }}--{{ course.code }}</p>
-                <p>{{ course.instructor }}</p>
-                <p>{{ course.TA }}</p>
+                <p style="font-weight: bold; font-size: x-large;">
+                    {{ course.name }} ({{ course.code }})
+                </p>
+                <p><strong>Instructor:</strong> 
+                    {% if instructor %}
+                        {{ instructor.name }}
+                    {% else %}
+                        Not assigned
+                    {% endif %}
+                </p>
+                <p><strong>TA:</strong> 
+                    {% if ta %}
+                        {{ ta.name }}
+                    {% else %}
+                        Not assigned
+                    {% endif %}
+                </p>
+                <p><strong>Credits:</strong> {{ course.credits }}</p>
+                <p><strong>Seats:</strong> {{ course.seats_left }}/{{ course.max_seats }}</p>
+                <p><strong>Schedule:</strong> {{ course.schedule }}</p>
+                <p><strong>Department:</strong> {{ course.department }}</p>
             </div>
             <div id="course-col-2">
-                <a href="/admin/editcourse/{{ course.id }} ">
-                    <button>Change Instructor</button>
+                <a href="/admin/editcourse/{{ course.id }}">
+                    <button>Edit Course</button>
+                </a>
+                <br><br>
+                <a href="/admin/deletecourse/{{ course.id }}" 
+                   onclick="return confirm('Are you sure you want to delete this course?')">
+                    <button style="background-color: #ff6b6b;">Delete Course</button>
                 </a>
             </div>
         </div>
+        
         <div id="student-container">
-            <h1 style="text-align: center;background-color: wheat;border-radius: 10px;">Student List</h1>
-            {%for student in students %}
-                <div id="student-list-item">
-                    <h2>{{ student.name }}</h2>
-                    <p>Student ID: {{ student.id }}</p>
-                    <p>Major</p>
-                    <button id="remove-btn">remove</button>
+            <h1 style="text-align: center; background-color: wheat; border-radius: 10px; padding: 10px;">
+                Enrolled Students ({{ students|length }})
+            </h1>
+            
+            {% if students %}
+                {% for student in students %}
+                    <div id="student-list-item">
+                        <h2>{{ student.name }}</h2>
+                        <p><strong>Student ID:</strong> {{ student.id }}</p>
+                        <p><strong>Major:</strong> {{ student.major }}</p>
+                        <p><strong>Level:</strong> {{ student.level }}</p>
+                        <p><strong>Email:</strong> {{ student.email }}</p>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; padding: 20px; background-color: wheat; border-radius: 10px;">
+                    <p>No students enrolled in this course yet.</p>
                 </div>
-            {%endfor%}
+            {% endif %}
         </div>
-    {%endif%}
+    {% else %}
+        <div style="text-align: center; padding: 50px;">
+            <h2>Course not found</h2>
+            <a href="/admin/searchcourse">
+                <button>Back to Course Search</button>
+            </a>
+        </div>
+    {% endif %}
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="/admin/searchcourse">
+            <button>Back to Course Search</button>
+        </a>
+    </div>
 </body>
 </html>

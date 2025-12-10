@@ -1,0 +1,190 @@
+#option{
+    padding: 5px;
+    width: 150px;
+    margin: 10px;
+    background-color: black;
+    color: floralwhite;
+}
+#search-bar{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+#course-search-input{
+    width: 500px;
+    height: 30px;
+    font-size: 16px;
+    padding: 5px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#course-search-button{
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 10px;
+    position: relative;
+    bottom: 10px;
+}
+#course-search-button:hover{
+    box-shadow: grey 0px 0px 5px;
+
+}
+a{
+    text-decoration: none;
+    color: floralwhite;
+}
+#option:hover{
+    box-shadow: black 0px 0px 10px;
+    cursor: pointer;
+}
+#container1{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh; 
+    margin: 20px;
+}
+#container2{
+    display:grid ;
+    grid-template-columns:1fr 1fr; 
+    gap: 5px;
+}
+body{
+    background-color: floralwhite;
+}
+#course-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px;
+    border: 2px solid black;
+    background-color: burlywood;
+}
+#bottom-info{
+    margin-top: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: flex-end;
+    width: 100%;
+    color: grey;
+}
+#view-btn{
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    bottom: 10px;
+    left:50px;
+    color: gray;
+    background-color: burlywood;
+    border-bottom: 2px gray solid;
+    border-left: 2px gray solid;
+
+}
+#view-btn:hover{
+    box-shadow: grey 0px 0px 8px;
+}
+#course-info{
+    margin-bottom: 20px;
+    font-size: 16px;
+    color: black;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: wheat;
+    padding: 10px;
+    border-radius: 10px;
+}
+#course-col-2{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+#student-list-item{
+    margin: 5px;
+    padding: 10px;
+    border-bottom: 1px solid gray;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: wheat;
+}
+#course-col-2 button{
+    background-color: wheat;
+    border-bottom: 2px gray solid;
+    border-left: 2px gray solid;
+    cursor: pointer;
+}
+#course-col-2 button:hover{
+    box-shadow: grey 0px 0px 8px;
+}
+#remove-btn{
+    background-color: wheat;
+    border-bottom: 2px gray solid;
+    border-left: 2px gray solid;
+    cursor: pointer;
+}
+#remove-btn:hover{
+    box-shadow: grey 0px 0px 8px;
+}
+#person-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: burlywood;
+    width: 500px;
+    border-radius: 10px;
+}
+#edit-btn{
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    bottom: 0px;
+    left:150px;
+    color: gray;
+    background-color: burlywood;
+    border-bottom: 2px gray solid;
+    border-left: 2px gray solid;
+
+}
+#edit-btn:hover{
+    box-shadow: grey 0px 0px 8px;
+}
+#update-btn{
+    background-color: wheat;
+    border-bottom: 2px gray solid;
+    border-left: 2px gray solid;
+    cursor: pointer;
+}
+#update-btn:hover{
+    box-shadow: grey 0px 0px 8px;
+}
+#add-btn{
+    background-color: wheat;
+    border-bottom: 2px gray solid;
+    border-left: 2px gray solid;
+    cursor: pointer;
+}
+#add-btn:hover{
+    box-shadow: grey 0px 0px 8px;
+}
+#person-container-edit{
+    margin: 5px;
+    padding: 10px;
+    border-bottom: 1px solid gray;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: wheat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

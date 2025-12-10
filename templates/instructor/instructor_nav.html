@@ -1,0 +1,11 @@
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="{{ url_for('instructor.dashboard') }}" class="logo">Instructor Portal 🎓</a>
+        
+        <ul class="nav-links">
+            <li><a href="{{ url_for('instructor.dashboard') }}">Dashboard</a></li>
+            </ul>
+    </div>
+</nav>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">

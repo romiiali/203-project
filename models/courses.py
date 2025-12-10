@@ -43,6 +43,10 @@ class Course(db.Model):
     @staticmethod
     def get_by_id(course_id):
         return Course.query.get(course_id)
+
+    @classmethod
+    def get_courses_by_instructor(cls, instructor_name):
+        return [cls(**data) for data in cls._courses_data if data['instructor'] == instructor_name]
     
     @staticmethod
     def get_by_code(course_code):

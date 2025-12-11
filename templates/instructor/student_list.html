@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head><title>Students in {{ course.course_code }}</title></head>
+<body>
+    {% include 'instructor/instructor_nav.html' %}
+    <h1 style="text-align: center;">Students Enrolled in {{ course.course_code }}</h1>
+
+    <div class="grid-container">
+        {% for student in students %}
+        <div class="card" style="background-color: white; color: black; height: auto;">
+            <h3>{{ student.name }}</h3>
+            <p>ID: {{ student.id }}</p>
+            <a href="{{ url_for('instructor.view_student', student_id=student.id) }}">
+                <button class="btn-view">View Profile</button>
+            </a>
+        </div>
+        {% else %}
+            <p style="text-align: center;">No students enrolled yet.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head><title>Add Assignment</title></head>
+<body>
+    {% include 'instructor/instructor_nav.html' %}
+    
+    <div class="form-container">
+        <h2 style="text-align: center; color: #8e44ad;">Create Assignment 📝</h2>
+        
+        <form method="POST">
+            <label>Assignment Title</label>
+            <input type="text" name="title" required placeholder="e.g. Lab Report 1">
+            
+            <label>Description / Instructions</label>
+            <textarea name="description" required placeholder="Detailed instructions for students..."></textarea>
+            
+            <label>Due Date</label>
+            <input type="date" name="due_date" required>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn-primary" style="background-color: #8e44ad;">Publish Assignment</button>
+                <a href="{{ url_for('instructor.open_course', course_code=course_code) }}" style="width: 100%;">
+                    <button type="button" class="btn-view" style="width: 100%;">Cancel</button>
+                </a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

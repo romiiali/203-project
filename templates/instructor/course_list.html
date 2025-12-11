@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>My Courses</title></head>
+<body>
+    {% include 'instructor/instructor_nav.html' %}
+    <h1 style="text-align: center;">Welcome, {{ instructor_name }}</h1>
+    
+    <div class="grid-container">
+        {% for course in courses %}
+        <div class="course-card">
+            <h2>{{ course.course_code }}</h2>
+            <p>{{ course.name }}</p>
+            <div class="actions">
+                <a href="{{ url_for('instructor.open_course', course_code=course.course_code) }}">
+                    <button class="btn-view">Open Course</button>
+                </a>
+            </div>
+        </div>
+        {% else %}
+            <p style="text-align: center;">No courses assigned to you.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

@@ -1,96 +1,92 @@
-from flask import Blueprint, render_template, request, redirect,url_for
+# This should be renamed to instructor_model.py to avoid confusion with the Blueprint
+from extensions import db
+from models.user import User
 from models.courses import Course
-from models.people import Person
-from models.registration import Registration
-from models.assignment import Assignment
-from models.announcement import Announcement
+from models.enrollment import Enrollment
 
-instructor_bp = Blueprint('instructor', __name__, url_prefix='/instructor')
-CURRENT_INSTRUCTOR = "Dr. Alice Johnson"
-
-@instructor_bp.route('/')
-def dashboard():
-
-    my_courses = Course.get_courses_by_instructor(CURRENT_INSTRUCTOR)
+class Instructor:
+    """Instructor model that works with the User model"""
     
-    course_count = len(my_courses)
+    @staticmethod
+    def get_by_id(instructor_id):
+        """Get instructor by ID"""
+        user = User.get_by_id(instructor_id)
+        if user and user.role == 'instructor':
+            return user
+        return None
     
-    return render_template('instructor/dashboard.html', 
-                           instructor_name=CURRENT_INSTRUCTOR, 
-                           courses=my_courses,
-                           course_count=course_count)
-
-
-@instructor_bp.route('/course/<course_code>')
-def open_course(course_code):
-    course = Course.get_course_by_id(course_code)
+    @staticmethod
+    def get_courses_taught(instructor_id):
+        """Get all courses taught by this instructor"""
+        return Course.query.filter_by(instructor_id=instructor_id).all()
     
-    assignments = Assignment.get_assignments_by_course(course_code)
-    announcements = Announcement.get_announcements_by_course(course_code)
+    @staticmethod
+    def get_students_in_course(course_code):
+        """Get all students enrolled in a course taught by this instructor"""
+        course = Course.get_by_code(course_code)
+        if not course:
+            return []
+        return course.get_enrolled_students()
     
-    return render_template('instructor/open_course.html', 
-                           course=course, 
-                           assignments=assignments, 
-                           announcements=announcements)
-
-@instructor_bp.route('/course/<course_code>/announce', methods=['GET', 'POST'])
-def make_announcement(course_code):
-    if request.method == 'POST':
-        Announcement.add_announcement(
-            course_code,
-            request.form['title'],
-            request.form['content']
-        )
-        return redirect(url_for('instructor.open_course', course_code=course_code))
+    @staticmethod
+    def add_course(code, name, description=None, credits=3, max_seats=30, 
+                   schedule="TBA", department="General"):
+        """Add a new course (assuming current instructor is adding it)"""
+        from flask import session
+        instructor_id = session.get('user_id')
         
-    return render_template('instructor/make_announcement.html', course_code=course_code)
-
-@instructor_bp.route('/course/<course_code>/add_assignment', methods=['GET', 'POST'])
-def send_assignment(course_code):
-    if request.method == 'POST':
-        Assignment.add_assignment(
-            course_code,
-            request.form['title'],
-            request.form['description'],
-            request.form['due_date']
-        )
-        return redirect(url_for('instructor.open_course', course_code=course_code))
+        if not instructor_id:
+            return None
         
-    return render_template('instructor/send_assignment.html', course_code=course_code)
-
-@instructor_bp.route('/course/<course_code>/students')
-def student_list(course_code):
-    course = Course.get_course_by_id(course_code)
-    all_people = Person.get_all_people()
-    
-    enrolled_students = []
-    for person in all_people:
-        if person.role == "Student":
-            student_courses = Registration.get_student_courses(person.id)
-            if course_code in student_courses:
-                enrolled_students.append(person)
-                
-    return render_template('instructor/student_list.html', course=course, students=enrolled_students)
-
-@instructor_bp.route('/student/<student_id>')
-def view_student(student_id):
-    student = Person.get_person_by_id(student_id)
-    return render_template('instructor/view_student.html', student=student)
-
-
-@instructor_bp.route('/course/<course_code>/edit', methods=['GET', 'POST'])
-def edit_course(course_code):
-    course = Course.get_course_by_id(course_code)
-    
-    if request.method == 'POST':
-        Course.edit_course(
-            course_code, 
-            request.form['name'], 
-            request.form['ta'], 
-            CURRENT_INSTRUCTOR,
-            request.form['credits'], 
-            request.form['seats']
+        course = Course(
+            code=code,
+            name=name,
+            description=description,
+            instructor_id=instructor_id,
+            credits=credits,
+            max_seats=max_seats,
+            schedule=schedule,
+            department=department
         )
-        return redirect(url_for('instructor.open_course', course_code=course_code))
         
-    return render_template('instructor/edit_course.html', course=course)
+        db.session.add(course)
+        db.session.commit()
+        return course
+    
+    @staticmethod
+    def update_course(course_code, **kwargs):
+        """Update course information"""
+        course = Course.get_by_code(course_code)
+        if not course:
+            return False
+        
+        for key, value in kwargs.items():
+            if hasattr(course, key) and value is not None:
+                setattr(course, key, value)
+        
+        db.session.commit()
+        return True
+    
+    @staticmethod
+    def get_assignment_stats(course_code):
+        """Get statistics for assignments in a course"""
+        course = Course.get_by_code(course_code)
+        if not course:
+            return {}
+        
+        assignments = course.assignments
+        stats = {
+            'total_assignments': len(assignments),
+            'assignments_with_submissions': 0,
+            'average_grades': {}
+        }
+        
+        for assignment in assignments:
+            submissions = assignment.get_submissions()
+            if submissions:
+                stats['assignments_with_submissions'] += 1
+                total_grade = sum(s.grade for s in submissions if s.grade)
+                avg_grade = total_grade / len(submissions) if submissions else 0
+                stats['average_grades'][assignment.title] = avg_grade
+        
+        return stats

@@ -15,9 +15,9 @@
                    id="course-search-input" 
                    name="search"
                    placeholder="Search for a course..."  
-                   value="{{ search_query }}"/>
+                   value="{{ search_term }}"/>
             <button type="submit" id="course-search-button">Search</button>
-            {% if search_query %}
+            {% if search_term %}
                 <a href="/admin/searchcourse">
                     <button type="button" id="clear-search-button" style="position: relative; bottom: 10px; margin: 10px;font-size: medium;padding-bottom: 5px;padding-top: 5px;">Clear Search</button>
                 </a>
@@ -28,8 +28,8 @@
                 {% for course in courses %}
                     <div id="top-info">
                         <h2>{{ course.code }} - {{ course.name }}</h2>
-                        <p>Instructor: {{ course.instructor }}</p>
-                        <p>TA: {{ course.TA }}</p>
+                        <p>Instructor: {{ course.instructor.name }}</p>
+                        <p>TA: {{ course.ta.name }}</p>
                     </div>
                     <div id="bottom-info">
                         <p>Seats left: {{ course.seats_left }}</p>
@@ -38,11 +38,12 @@
                             <button id="view-btn">View</button>
                         </a>
                     </div>
+                    <hr>
                 {% endfor %}
             {% else %}
                 <p style="text-align: center; padding: 20px;">
-                    {% if search_query %}
-                        No courses found for "{{ search_query }}"
+                    {% if search_term %}
+                        No courses found for "{{ search_term }}"
                     {% else %}
                         No courses available
                     {% endif %}

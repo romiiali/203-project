@@ -12,6 +12,7 @@ def login():
         user = User.login(email, password)
         if user:
             session['user_id'] = user.id
+            session['role'] = user.role
             
             if user.role == 'student':
                 return redirect('/student/dashboard')
@@ -25,10 +26,10 @@ def login():
                 flash("Unknown user role", "error")
                 session.pop('user_id', None)
                 return redirect('/login')
-    else:
-        flash("Invalid email or password", "error")
+        else:
+            flash("Invalid email or password", "error")  # <-- This is in the wrong place!
     
-    return render_template('/login')
+    return render_template('auth/login.html')
 
 @auth_bp.route('/logout')
 def logout():

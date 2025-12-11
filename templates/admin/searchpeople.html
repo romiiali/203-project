@@ -17,7 +17,7 @@
                    placeholder="Search by name, ID, role, or email..." 
                    value="{{ search_query }}">
             <button type="submit" id="course-search-button">Search</button>
-            {% if search_query %}
+            {% if search_term %}
                 <a href="/admin/searchpeople">
                     <button type="button" id="clear-search-button" style="position: relative; bottom: 10px; margin: 10px;font-size: medium;padding-bottom: 5px;padding-top: 5px;">Clear Search</button>
                 </a>
@@ -68,8 +68,8 @@
     {% else %}
         <div style="text-align: center; padding: 40px; background-color: wheat; border-radius: 10px; width: 80%; margin: 0 auto;">
             <p style="font-size: 18px;">
-                {% if search_query %}
-                    No people found for "{{ search_query }}"
+                {% if search_term %}
+                    No people found for "{{ search_term }}"
                 {% else %}
                     No people found in the system
                 {% endif %}

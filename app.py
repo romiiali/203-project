@@ -1,65 +1,44 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from models.courses import Course
-from models.people import Person
-from models.registration import Registration
-from models.assignment import Assignment
+from flask import Flask, session, redirect, url_for
+from config import Config
+from extensions import db
 
-instructor_bp = Blueprint('instructor', __name__, url_prefix='/instructor')
+# Initialize app first
+app = Flask(__name__)
+app.config.from_object(Config)
+db.init_app(app)
 
-CURRENT_INSTRUCTOR = "Dr. Alice Johnson"
+# NOW import models (after db is initialized with app)
+with app.app_context():
+    # This ensures models are loaded in app context
+    from models.user import User
+    from models.courses import Course
+    from models.enrollment import Enrollment
+    from models.assignment import Assignment
+    from models.announcement import Announcement
+    from models.submission import Submission
 
-@instructor_bp.route('/')
-def dashboard():
-    my_courses = Course.get_courses_by_instructor(CURRENT_INSTRUCTOR)
-    return render_template('instructor/course_list.html', courses=my_courses, instructor_name=CURRENT_INSTRUCTOR)
+# Now import blueprints
+from controllers.auth_controller import auth_bp
+from controllers.student_controller import student_bp
+from controllers.TA_controller import ta_bp
+from controllers.admin_controller import admin_bp
+from controllers.instructor_controller import instructor_bp
 
-@instructor_bp.route('/course/<course_code>')
-def open_course(course_code):
-    course = Course.get_course_by_id(course_code)
-    assignments = Assignment.get_assignments_by_course(course_code)
-    return render_template('instructor/open_course.html', course=course, assignments=assignments)
+app.secret_key = 'dev-secret-key-change-this'
 
-@instructor_bp.route('/course/<course_code>/edit', methods=['GET', 'POST'])
-def edit_course(course_code):
-    course = Course.get_course_by_id(course_code)
-    if request.method == 'POST':
-        Course.edit_course(
-            course_code, 
-            request.form['name'], 
-            request.form['ta'], 
-            CURRENT_INSTRUCTOR, 
-            request.form['credits'], 
-            request.form['seats']
-        )
-        return redirect(url_for('instructor.open_course', course_code=course_code))
-    return render_template('instructor/edit_course.html', course=course)
+# Register blueprints
+app.register_blueprint(auth_bp)
+app.register_blueprint(student_bp)
+app.register_blueprint(ta_bp)
+app.register_blueprint(admin_bp)
+app.register_blueprint(instructor_bp)
 
-@instructor_bp.route('/course/<course_code>/students')
-def student_list(course_code):
-    course = Course.get_course_by_id(course_code)
-    all_people = Person.get_all_people()
-    enrolled_students = []
-    for person in all_people:
-        if person.role == "Student":
-            student_courses = Registration.get_student_courses(person.id)
-            if course_code in student_courses:
-                enrolled_students.append(person)
-                
-    return render_template('instructor/student_list.html', course=course, students=enrolled_students)
+@app.route('/')
+def index():
+    return redirect(url_for('auth.login'))
 
-@instructor_bp.route('/student/<student_id>')
-def view_student(student_id):
-    student = Person.get_person_by_id(student_id)
-    return render_template('instructor/view_student.html', student=student)
-
-@instructor_bp.route('/course/<course_code>/add_assignment', methods=['GET', 'POST'])
-def send_assignment(course_code):
-    if request.method == 'POST':
-        Assignment.add_assignment(
-            course_code,
-            request.form['title'],
-            request.form['description'],
-            request.form['due_date']
-        )
-        return redirect(url_for('instructor.open_course', course_code=course_code))
-    return render_template('instructor/send_assignment.html', course_code=course_code)
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+    
+    app.run(debug=True, port=5000)

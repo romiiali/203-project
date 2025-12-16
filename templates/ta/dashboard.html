@@ -8,58 +8,45 @@
 </head>
 <body>
     <div class="container mt-4">
-        <div class="row mb-4">
-            <div class="col-md-6 mb-2">
-                <a href="/ta/search_course" class="btn btn-outline-primary w-100 p-4 shadow-sm">
-                    <div style="font-size: 2em; margin-bottom: 10px;">🔍</div>
-                    <strong class="fs-5">Search & View Course</strong>
-                </a>
-            </div>
-            <div class="col-md-6 mb-2">
-                <a href="/ta/search_student" class="btn btn-outline-success w-100 p-4 shadow-sm">
-                    <div style="font-size: 2em; margin-bottom: 10px;">👥</div>
-                    <strong class="fs-5">Search & View Student</strong>
-                </a>
-            </div>
-        </div>
-
         <div class="card shadow-sm border-info">
             <div class="card-header bg-info">
                 <h4 class="mb-0">👨‍🏫 TA Dashboard</h4>
-            </div>
-            <div class="card-body">
-                <h5>All Active Courses</h5>
-                <p class="text-muted">Select a course to manage assignments, attendance & announcements.</p>
-
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mt-3">
                         <thead class="table-light">
-                            <tr>
-                                <th>Code</th>
-                                <th>Course Name</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for course in courses %}
+                            {% if course %}
                             <tr>
                                 <td><strong>{{ course.code }}</strong></td>
                                 <td>{{ course.name }}</td>
-                                <td>
-                                    <a href="/ta/course/{{ course.id }}" class="btn btn-sm btn-outline-info">
-                                        ⚙️ Manage Course
-                                    </a>
-                                </td>
                             </tr>
+                            <div class="row mb-4">
+                            <div class="col-md-6 mb-2">
+                                <a href="/ta/student_list" class="btn btn-outline-primary w-100 p-4 shadow-sm">
+                                    <div style="font-size: 2em; margin-bottom: 10px;">🔍</div>
+                                    <strong class="fs-5">View Studtent List</strong>
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <a href="/ta/post_assignment" class="btn btn-outline-success w-100 p-4 shadow-sm">
+                                    <div style="font-size: 2em; margin-bottom: 10px;">👥</div>
+                                    <strong class="fs-5">Post Assignment</strong>
+                                </a>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <a href="/ta/post_announcment" class="btn btn-outline-success w-100 p-4 shadow-sm">
+                                    <div style="font-size: 2em; margin-bottom: 10px;">👥</div>
+                                    <strong class="fs-5">Post Announcment</strong>
+                                </a>
+                            </div>
+                        </div>
                             {% else %}
                             <tr>
                                 <td colspan="3" class="text-center py-4 text-muted">No courses assigned to you yet.</td>
                             </tr>
-                            {% endfor %}
-                        </tbody>
+                            {% endif %}
+                        </thead>
                     </table>
                 </div>
-            </div>
         </div>
     </div>
 </body>

@@ -32,7 +32,7 @@ def course_details(course_id):
     
     # Check if instructor teaches this course
     instructor = Instructor.get_by_id(session['user_id'])
-    if course_id not in instructor.teaching_courses:
+    if not instructor.is_teaching_course(course_id):
         flash("You don't teach this course", "error")
         return redirect(url_for('instructor.dashboard'))
     
@@ -56,13 +56,22 @@ def add_assignment(course_id):
         flash("Course not found", "error")
         return redirect(url_for('instructor.dashboard'))
     
+    # Check if instructor teaches this course
+    instructor = Instructor.get_by_id(session['user_id'])
+    if not instructor.is_teaching_course(course_id):
+        flash("You don't teach this course", "error")
+        return redirect(url_for('instructor.dashboard'))
+    
     title = request.form.get('title')
     description = request.form.get('description')
     due_date = request.form.get('due_date')
     
     if title and description and due_date:
         assignment = course.add_assignment(title, description, due_date)
-        flash('Assignment added successfully!', 'success')
+        if assignment:
+            flash('Assignment added successfully!', 'success')
+        else:
+            flash('Failed to add assignment', 'error')
     else:
         flash('Please fill all fields', 'error')
     
@@ -78,12 +87,21 @@ def add_announcement(course_id):
         flash("Course not found", "error")
         return redirect(url_for('instructor.dashboard'))
     
+    # Check if instructor teaches this course
+    instructor = Instructor.get_by_id(session['user_id'])
+    if not instructor.is_teaching_course(course_id):
+        flash("You don't teach this course", "error")
+        return redirect(url_for('instructor.dashboard'))
+    
     title = request.form.get('title')
     content = request.form.get('content')
     
     if title and content:
         announcement = course.add_announcement(title, content, session['user_id'])
-        flash('Announcement added successfully!', 'success')
+        if announcement:
+            flash('Announcement added successfully!', 'success')
+        else:
+            flash('Failed to add announcement', 'error')
     else:
         flash('Please fill all fields', 'error')
     
@@ -99,23 +117,16 @@ def view_submissions(assignment_id):
         flash("Assignment not found", "error")
         return redirect(url_for('instructor.dashboard'))
     
-    # Get all submissions
-    submissions_data = assignment.get_all_submissions()
+    # Check if instructor teaches the course this assignment belongs to
+    instructor = Instructor.get_by_id(session['user_id'])
+    course = Course.get_by_id(assignment.course_id)
     
-    # Convert to list of submission objects with student info
-    from models.student import Student
-    submissions = []
-    for student_id, submission_info in submissions_data.items():
-        student = Student.get_by_id(student_id)
-        if student:
-            submissions.append({
-                'student': student,
-                'grade': submission_info.get('grade'),
-                'feedback': submission_info.get('feedback'),
-                'timestamp': submission_info.get('timestamp'),
-                'text': submission_info.get('text'),
-                'id': student_id
-            })
+    if not course or not instructor.is_teaching_course(course.id):
+        flash("You don't teach this course", "error")
+        return redirect(url_for('instructor.dashboard'))
+    
+    # Get all submissions with the FIXED format
+    submissions = assignment.get_all_submissions()
     
     # Get course info
     course = Course.get_by_id(assignment.course_id)
@@ -124,3 +135,35 @@ def view_submissions(assignment_id):
                          assignment=assignment, 
                          submissions=submissions,
                          course=course)
+
+@instructor_bp.route('/submission/<int:submission_id>/grade', methods=['POST'])
+def grade_submission(submission_id):
+    """Grade a specific submission"""
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        return redirect('/login')
+    
+    from models.submission import Submission
+    submission = Submission.query.get(submission_id)
+    
+    if not submission:
+        flash("Submission not found", "error")
+        return redirect(request.referrer or url_for('instructor.dashboard'))
+    
+    # Check if instructor can grade this submission
+    instructor = Instructor.get_by_id(session['user_id'])
+    assignment = Assignment.get_by_id(submission.assignment_id)
+    
+    if not assignment or not instructor.is_teaching_course(assignment.course_id):
+        flash("You don't have permission to grade this submission", "error")
+        return redirect(request.referrer or url_for('instructor.dashboard'))
+    
+    grade = request.form.get('grade')
+    feedback = request.form.get('feedback')
+    
+    if grade:
+        success, message = assignment.grade_submission(submission.student_id, grade, feedback)
+        flash(message, 'success' if success else 'error')
+    else:
+        flash('Grade is required', 'error')
+    
+    return redirect(request.referrer or url_for('instructor.dashboard'))

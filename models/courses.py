@@ -1,6 +1,8 @@
 from extensions import db
 from models.enrollment import Enrollment
-
+from models.announcement import Announcement
+from models.assignment import Assignment
+from models.user import User
 class Course(db.Model):
     __tablename__ = 'courses'
     
@@ -101,6 +103,48 @@ class Course(db.Model):
             db.session.commit()
             return True
         return False
+    
+    def get_announcements(self):
+        """Get announcements for this course"""
+        return Announcement.query.filter_by(course_id=self.id).order_by(
+            Announcement.created_at.desc()
+        ).all()
+    
+    def get_assignments(self):
+        """Get assignments for this course"""
+        return Assignment.query.filter_by(course_id=self.id).all()
+    
+    def get_ta(self):
+        """Get TA assigned to this course"""
+        return User.query.get(self.ta_id) if self.ta_id else None
+    
+    def get_instructor(self):
+        """Get instructor teaching this course"""
+        return User.query.get(self.instructor_id) if self.instructor_id else None
+    
+    def add_assignment(self, title, description, due_date):
+        """Add assignment to course (compatibility method)"""
+        assignment = Assignment(
+            title=title,
+            description=description,
+            due_date=due_date,
+            course_id=self.id
+        )
+        db.session.add(assignment)
+        db.session.commit()
+        return assignment
+    
+    def add_announcement(self, title, content, poster_id):
+        """Add announcement to course (compatibility method)"""
+        announcement = Announcement(
+            title=title,
+            content=content,
+            poster_id=poster_id,
+            course_id=self.id
+        )
+        db.session.add(announcement)
+        db.session.commit()
+        return announcement
     
     def to_dict(self):
         """Convert course to dictionary"""

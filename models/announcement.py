@@ -17,6 +17,7 @@ class Announcement(db.Model):
     
     @staticmethod
     def get_by_course(course_id):
+        """Get announcements for a course"""
         return Announcement.query.filter_by(course_id=course_id).order_by(
             Announcement.created_at.desc()
         ).all()

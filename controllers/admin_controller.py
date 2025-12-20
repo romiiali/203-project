@@ -59,7 +59,7 @@ def add_person():
         password = request.form.get('password')  # Added password field
         role = request.form.get('role')
         
-        if name and email and password and role and id:
+        if name and email and password and role:
             # Check if email already exists
             existing_user = User.query.filter_by(email=email).first()
             if existing_user:

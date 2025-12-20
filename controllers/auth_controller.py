@@ -23,11 +23,7 @@ def login():
             elif user.role == 'admin':
                 return redirect('/admin/dashboard')
             else:
-                flash("Unknown user role", "error")
-                session.pop('user_id', None)
-                return redirect('/login')
-        else:
-            flash("Invalid email or password", "error")  # <-- This is in the wrong place!
+                flash("Invalid email or password", "error")  # <-- This is in the wrong place!
     
     return render_template('auth/login.html')
 

@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Config:
-    # Secret key for Flask sessions
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key-change-this'
     
-    # Windows Authentication Connection String
+    # Try different server names:
+    # Option 1: If using default instance
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'mssql+pyodbc://@localhost/CourseManagement?trusted_connection=yes&driver=ODBC+Driver+17+for+SQL+Server'
     

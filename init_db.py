@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Add the current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask
@@ -9,16 +8,13 @@ from config import Config
 from extensions import db
 from werkzeug.security import generate_password_hash
 from datetime import datetime, timedelta
-from sqlalchemy import text, exc
+from sqlalchemy import text, exc, inspect
 
 def create_app():
     """Create Flask application for database initialization"""
     app = Flask(__name__)
     app.config.from_object(Config)
-    
-    # Initialize extensions with app
     db.init_app(app)
-    
     return app
 
 def init_database():
@@ -39,10 +35,43 @@ def init_database():
         except Exception as e:
             print(f"⚠️ Could not get connection info: {e}")
         
-        print("\nCreating database tables...")
+        print("\n📊 Checking existing database state...")
+        
+        # Check if tables exist
+        inspector = inspect(db.engine)
+        existing_tables = inspector.get_table_names()
+        
+        if existing_tables:
+            print(f"Found {len(existing_tables)} existing tables:")
+            for table in existing_tables:
+                try:
+                    count = db.session.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
+                    print(f"  • {table}: {count} rows")
+                except:
+                    print(f"  • {table}: Could not count rows")
+        
+        print("\n🚨 WARNING: This will DELETE ALL EXISTING DATA!")
+        response = input("Do you want to continue? (yes/no): ")
+        
+        if response.lower() != 'yes':
+            print("Operation cancelled.")
+            return
+        
+        print("\nCreating/Recreating database tables...")
         
         try:
-            # Create all tables
+            # Drop all tables first (in correct order to avoid foreign key issues)
+            print("Dropping existing tables...")
+            db.session.execute(text("EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT all'"))
+            db.session.execute(text("EXEC sp_MSforeachtable 'DROP TABLE ?'"))
+            db.session.commit()
+            print("✅ Dropped existing tables")
+        except Exception as e:
+            print(f"⚠️ Could not drop tables: {e}")
+            print("Trying to continue with create_all...")
+        
+        try:
+            # Create all tables fresh
             db.create_all()
             print("✅ Tables created successfully")
         except Exception as e:
@@ -53,27 +82,7 @@ def init_database():
         print("\nAdding dummy data...")
         
         try:
-            # Clear existing data in correct order (respecting foreign key constraints)
-            print("Clearing existing data...")
-            
-            # Disable foreign key constraints temporarily
-            db.session.execute(text("EXEC sp_MSforeachtable 'ALTER TABLE ? NOCHECK CONSTRAINT all'"))
-            
-            # Delete in reverse order of dependencies
-            db.session.execute(text("DELETE FROM submissions"))
-            db.session.execute(text("DELETE FROM announcements"))
-            db.session.execute(text("DELETE FROM assignments"))
-            db.session.execute(text("DELETE FROM enrollments"))
-            db.session.execute(text("DELETE FROM courses"))
-            db.session.execute(text("DELETE FROM users"))
-            
-            # Re-enable foreign key constraints
-            db.session.execute(text("EXEC sp_MSforeachtable 'ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all'"))
-            
-            db.session.commit()
-            print("✅ Cleared existing data")
-            
-            # Now import models after clearing data
+            # Import models AFTER creating tables
             from models.user import User
             from models.courses import Course
             from models.enrollment import Enrollment
@@ -81,154 +90,147 @@ def init_database():
             from models.announcement import Announcement
             from models.submission import Submission
             
-            # 1. Add Users (must be first because other tables reference users)
-            print("Adding users...")
+            # 1. Add Users - ONE BY ONE with commits
+            print("Adding users one by one...")
             
-            users = [
-                # Admins
-                User(
-                    name='Admin User',
-                    email='admin@university.edu',
-                    role='admin',
-                    password='admin123'
-                ),
-                User(
-                    name='System Admin',
-                    email='sysadmin@university.edu',
-                    role='admin',
-                    password='admin123'
-                ),
-                
-                # Instructors
-                User(
-                    name='Dr. Sarah Johnson',
-                    email='sarah@instructor.edu',
-                    role='instructor',
-                    password='prof123'
-                ),
-                User(
-                    name='Prof. Robert Smith',
-                    email='robert@instructor.edu',
-                    role='instructor',
-                    password='prof123'
-                ),
-                User(
-                    name='Dr. Jennifer Lee',
-                    email='jennifer@instructor.edu',
-                    role='instructor',
-                    password='prof123'
-                ),
-                
-                # TAs
-                User(
-                    name='Alex Chen',
-                    email='alex@ta.edu',
-                    role='ta',
-                    password='ta123'
-                ),
-                User(
-                    name='Lisa Wang',
-                    email='lisa@ta.edu',
-                    role='ta',
-                    password='ta123'
-                ),
-                
-                # Students
-                User(
-                    name='John Doe',
-                    email='john@student.edu',
-                    role='student',
-                    password='student123'
-                ),
-                User(
-                    name='Jane Smith',
-                    email='jane@student.edu',
-                    role='student',
-                    password='student123'
-                ),
-                User(
-                    name='Mike Johnson',
-                    email='mike@student.edu',
-                    role='student',
-                    password='student123'
-                ),
-                User(
-                    name='Emily Davis',
-                    email='emily@student.edu',
-                    role='student',
-                    password='student123'
-                ),
-                User(
-                    name='David Wilson',
-                    email='david@student.edu',
-                    role='student',
-                    password='student123'
-                ),
+            # Add users individually to ensure proper IDs
+            admin1 = User(name='Admin User', email='admin@university.edu', role='admin', password='admin123')
+            db.session.add(admin1)
+            db.session.commit()
+            
+            admin2 = User(name='System Admin', email='sysadmin@university.edu', role='admin', password='admin123')
+            db.session.add(admin2)
+            db.session.commit()
+            
+            instructor1 = User(name='Dr. Sarah Johnson', email='sarah@instructor.edu', role='instructor', password='prof123')
+            db.session.add(instructor1)
+            db.session.commit()
+            
+            instructor2 = User(name='Prof. Robert Smith', email='robert@instructor.edu', role='instructor', password='prof123')
+            db.session.add(instructor2)
+            db.session.commit()
+            
+            instructor3 = User(name='Dr. Jennifer Lee', email='jennifer@instructor.edu', role='instructor', password='prof123')
+            db.session.add(instructor3)
+            db.session.commit()
+            
+            # TAs
+            ta1 = User(name='Alex Chen', email='alex@ta.edu', role='ta', password='ta123')
+            db.session.add(ta1)
+            db.session.commit()
+            
+            ta2 = User(name='Lisa Wang', email='lisa@ta.edu', role='ta', password='ta123')
+            db.session.add(ta2)
+            db.session.commit()
+            
+            ta3 = User(name='Michael Brown', email='michael@ta.edu', role='ta', password='ta123')
+            db.session.add(ta3)
+            db.session.commit()
+            
+            ta4 = User(name='Sarah Davis', email='sarah@ta.edu', role='ta', password='ta123')
+            db.session.add(ta4)
+            db.session.commit()
+            
+            ta5 = User(name='David Wilson', email='david@ta.edu', role='ta', password='ta123')
+            db.session.add(ta5)
+            db.session.commit()
+            
+            # Students
+            students = [
+                ('John Doe', 'john@student.edu', 'student123'),
+                ('Jane Smith', 'jane@student.edu', 'student123'),
+                ('Mike Johnson', 'mike@student.edu', 'student123'),
+                ('Emily Davis', 'emily@student.edu', 'student123'),
+                ('Chris Wilson', 'chris@student.edu', 'student123'),
+                ('Jessica Lee', 'jessica@student.edu', 'student123'),
+                ('Daniel Kim', 'daniel@student.edu', 'student123'),
+                ('Amanda Taylor', 'amanda@student.edu', 'student123'),
             ]
             
-            for user in users:
-                db.session.add(user)
+            for name, email, password in students:
+                student = User(name=name, email=email, role='student', password=password)
+                db.session.add(student)
+                db.session.commit()
             
-            db.session.commit()
-            print(f"✅ Added {len(users)} users")
+            print(f"✅ Added 18 users total")
             
-            # Get user IDs after commit (auto-generated)
-            # Users: 1-2: admin, 3-5: instructors, 6-7: TAs, 8-12: students
+            # Get user IDs
+            dr_sarah = User.query.filter_by(email='sarah@instructor.edu').first()
+            prof_robert = User.query.filter_by(email='robert@instructor.edu').first()
+            dr_jennifer = User.query.filter_by(email='jennifer@instructor.edu').first()
             
-            # 2. Add Courses (requires instructor users to exist)
-            print("Adding courses...")
+            alex_ta = User.query.filter_by(email='alex@ta.edu').first()
+            lisa_ta = User.query.filter_by(email='lisa@ta.edu').first()
+            michael_ta = User.query.filter_by(email='michael@ta.edu').first()
+            sarah_ta = User.query.filter_by(email='sarah@ta.edu').first()
+            david_ta = User.query.filter_by(email='david@ta.edu').first()
+            
+            # 2. Add Courses
+            print("\nAdding courses...")
             
             courses = [
+                # CS101 - Alex Chen is the ONLY TA for this course
                 Course(
                     code='CS101',
                     name='Introduction to Programming',
                     description='Learn basic programming concepts using Python',
-                    instructor_id=3,  # Dr. Sarah Johnson
-                    ta_id=6,          # Alex Chen
+                    instructor_id=dr_sarah.id,
+                    ta_id=alex_ta.id,
                     credits=3,
-                    max_seats=30,
+                    max_seats=35,
+                    seats_left=35,
                     schedule='Mon/Wed 10:00-11:30 AM',
                     department='Computer Science'
                 ),
+                # CS201 - Lisa Wang is the ONLY TA for this course
                 Course(
                     code='CS201',
                     name='Data Structures and Algorithms',
                     description='Study of fundamental data structures and algorithms',
-                    instructor_id=3,  # Dr. Sarah Johnson
-                    ta_id=6,          # Alex Chen
+                    instructor_id=dr_sarah.id,
+                    ta_id=lisa_ta.id,
                     credits=4,
-                    max_seats=25,
+                    max_seats=30,
+                    seats_left=30,
                     schedule='Tue/Thu 1:00-2:30 PM',
                     department='Computer Science'
                 ),
+                # CS301 - Michael Brown is the ONLY TA for this course
                 Course(
                     code='CS301',
                     name='Database Systems',
                     description='Introduction to database design and SQL',
-                    instructor_id=4,  # Prof. Robert Smith
-                    ta_id=7,          # Lisa Wang
+                    instructor_id=prof_robert.id,
+                    ta_id=michael_ta.id,
                     credits=3,
                     max_seats=28,
+                    seats_left=28,
                     schedule='Mon/Wed 2:00-3:30 PM',
                     department='Computer Science'
                 ),
+                # MATH101 - Sarah Davis is the ONLY TA for this course
                 Course(
                     code='MATH101',
                     name='Calculus I',
                     description='Introduction to differential and integral calculus',
-                    instructor_id=5,  # Dr. Jennifer Lee
+                    instructor_id=dr_jennifer.id,
+                    ta_id=sarah_ta.id,
                     credits=4,
-                    max_seats=35,
+                    max_seats=40,
+                    seats_left=40,
                     schedule='Tue/Thu/Fri 9:00-10:00 AM',
                     department='Mathematics'
                 ),
+                # MATH201 - David Wilson is the ONLY TA for this course
                 Course(
                     code='MATH201',
                     name='Linear Algebra',
                     description='Vectors, matrices, and linear transformations',
-                    instructor_id=5,  # Dr. Jennifer Lee
+                    instructor_id=dr_jennifer.id,
+                    ta_id=david_ta.id,
                     credits=3,
-                    max_seats=30,
+                    max_seats=35,
+                    seats_left=35,
                     schedule='Mon/Wed/Fri 11:00-12:00 PM',
                     department='Mathematics'
                 ),
@@ -236,190 +238,215 @@ def init_database():
             
             for course in courses:
                 db.session.add(course)
+                db.session.commit()
             
-            db.session.commit()
             print(f"✅ Added {len(courses)} courses")
             
-            # 3. Add Enrollments (requires both users and courses to exist)
+            # Get course objects
+            cs101 = Course.query.filter_by(code='CS101').first()
+            cs201 = Course.query.filter_by(code='CS201').first()
+            cs301 = Course.query.filter_by(code='CS301').first()
+            math101 = Course.query.filter_by(code='MATH101').first()
+            math201 = Course.query.filter_by(code='MATH201').first()
+            
+            # Get student objects
+            john = User.query.filter_by(email='john@student.edu').first()
+            jane = User.query.filter_by(email='jane@student.edu').first()
+            mike = User.query.filter_by(email='mike@student.edu').first()
+            emily = User.query.filter_by(email='emily@student.edu').first()
+            chris = User.query.filter_by(email='chris@student.edu').first()
+            jessica = User.query.filter_by(email='jessica@student.edu').first()
+            daniel = User.query.filter_by(email='daniel@student.edu').first()
+            amanda = User.query.filter_by(email='amanda@student.edu').first()
+            
+            # 3. Add Enrollments
             print("Adding enrollments...")
             
             enrollments = [
-                # CS101 enrollments
-                Enrollment(student_id=8, course_id=1),  # John in CS101
-                Enrollment(student_id=9, course_id=1),  # Jane in CS101
-                Enrollment(student_id=10, course_id=1), # Mike in CS101
-                Enrollment(student_id=11, course_id=1), # Emily in CS101
+                # CS101 enrollments (Alex Chen's course)
+                Enrollment(student_id=john.id, course_id=cs101.id),
+                Enrollment(student_id=jane.id, course_id=cs101.id),
+                Enrollment(student_id=mike.id, course_id=cs101.id),
+                Enrollment(student_id=emily.id, course_id=cs101.id),
+                Enrollment(student_id=chris.id, course_id=cs101.id),
                 
-                # CS201 enrollments
-                Enrollment(student_id=8, course_id=2),  # John in CS201
-                Enrollment(student_id=10, course_id=2), # Mike in CS201
-                Enrollment(student_id=12, course_id=2), # David in CS201
+                # CS201 enrollments (Lisa Wang's course)
+                Enrollment(student_id=john.id, course_id=cs201.id),
+                Enrollment(student_id=mike.id, course_id=cs201.id),
+                Enrollment(student_id=chris.id, course_id=cs201.id),
+                Enrollment(student_id=jessica.id, course_id=cs201.id),
                 
-                # CS301 enrollments
-                Enrollment(student_id=9, course_id=3),  # Jane in CS301
-                Enrollment(student_id=11, course_id=3), # Emily in CS301
-                Enrollment(student_id=12, course_id=3), # David in CS301
+                # CS301 enrollments (Michael Brown's course)
+                Enrollment(student_id=jane.id, course_id=cs301.id),
+                Enrollment(student_id=emily.id, course_id=cs301.id),
+                Enrollment(student_id=jessica.id, course_id=cs301.id),
+                Enrollment(student_id=daniel.id, course_id=cs301.id),
                 
-                # MATH101 enrollments
-                Enrollment(student_id=8, course_id=4),  # John in MATH101
-                Enrollment(student_id=9, course_id=4),  # Jane in MATH101
-                Enrollment(student_id=10, course_id=4), # Mike in MATH101
+                # MATH101 enrollments (Sarah Davis's course)
+                Enrollment(student_id=john.id, course_id=math101.id),
+                Enrollment(student_id=jane.id, course_id=math101.id),
+                Enrollment(student_id=mike.id, course_id=math101.id),
+                Enrollment(student_id=daniel.id, course_id=math101.id),
+                Enrollment(student_id=amanda.id, course_id=math101.id),
                 
-                # MATH201 enrollments
-                Enrollment(student_id=11, course_id=5), # Emily in MATH201
-                Enrollment(student_id=12, course_id=5), # David in MATH201
+                # MATH201 enrollments (David Wilson's course)
+                Enrollment(student_id=emily.id, course_id=math201.id),
+                Enrollment(student_id=chris.id, course_id=math201.id),
+                Enrollment(student_id=jessica.id, course_id=math201.id),
+                Enrollment(student_id=amanda.id, course_id=math201.id),
             ]
             
             for enrollment in enrollments:
                 db.session.add(enrollment)
-            
             db.session.commit()
+            
             print(f"✅ Added {len(enrollments)} enrollments")
             
             # Update course seat counts
             print("Updating course seat counts...")
-            for course in courses:
-                # Count enrollments for each course
-                count = len([e for e in enrollments if e.course_id == course.id])
-                course.seats_left = course.max_seats - count
+            cs101.seats_left = cs101.max_seats - 5
+            cs201.seats_left = cs201.max_seats - 4
+            cs301.seats_left = cs301.max_seats - 4
+            math101.seats_left = math101.max_seats - 5
+            math201.seats_left = math201.max_seats - 4
             db.session.commit()
             print("✅ Updated seat counts")
             
-            # 4. Add Assignments (requires courses to exist)
+            # 4. Add Assignments
             print("Adding assignments...")
             
-            # Create datetime objects for due dates
-            due_date1 = datetime.now() + timedelta(days=14)  # 2 weeks from now
-            due_date2 = datetime.now() + timedelta(days=21)  # 3 weeks from now
-            due_date3 = datetime.now() + timedelta(days=7)   # 1 week from now
+            due_date1 = datetime.now() + timedelta(days=7)
+            due_date2 = datetime.now() + timedelta(days=14)
+            due_date3 = datetime.now() + timedelta(days=21)
             
             assignments = [
+                # CS101 assignments
                 Assignment(
-                    title='Python Basics Assignment',
-                    description='Write a Python program that calculates the factorial of a number',
+                    title='Python Basics Quiz',
+                    description='Complete the Python basics quiz on variables, data types, and loops',
                     due_date=due_date1,
-                    course_id=1  # CS101
+                    course_id=cs101.id
                 ),
                 Assignment(
-                    title='Midterm Exam',
-                    description='Covers chapters 1-5: Variables, Loops, Functions, Lists, and Dictionaries',
+                    title='Functions Project',
+                    description='Create a Python program with at least 3 custom functions',
                     due_date=due_date2,
-                    course_id=1  # CS101
+                    course_id=cs101.id
                 ),
+                
+                # CS201 assignments
                 Assignment(
                     title='Linked List Implementation',
                     description='Implement a singly linked list with insert, delete, and search operations',
                     due_date=due_date1,
-                    course_id=2  # CS201
+                    course_id=cs201.id
                 ),
+                
+                # CS301 assignments
                 Assignment(
-                    title='Database Design Project',
-                    description='Design a database schema for a library management system',
-                    due_date=due_date3,
-                    course_id=3  # CS301
-                ),
-                Assignment(
-                    title='Calculus Problem Set 1',
-                    description='Solve derivatives and integrals problems from chapter 2',
-                    due_date=due_date3,
-                    course_id=4  # MATH101
-                ),
-                Assignment(
-                    title='Matrix Operations',
-                    description='Implement matrix multiplication and determinant calculation',
+                    title='SQL Queries Assignment',
+                    description='Write SQL queries for the given database schema',
                     due_date=due_date2,
-                    course_id=5  # MATH201
+                    course_id=cs301.id
                 ),
             ]
             
             for assignment in assignments:
                 db.session.add(assignment)
-            
             db.session.commit()
+            
             print(f"✅ Added {len(assignments)} assignments")
             
-            # 5. Add Announcements (requires courses and users to exist)
-            print("Adding announcements...")
+            # Get assignment objects
+            cs101_assignment1 = Assignment.query.filter_by(title='Python Basics Quiz').first()
+            cs101_assignment2 = Assignment.query.filter_by(title='Functions Project').first()
+            cs201_assignment1 = Assignment.query.filter_by(title='Linked List Implementation').first()
+            cs301_assignment1 = Assignment.query.filter_by(title='SQL Queries Assignment').first()
             
-            announcements = [
-                Announcement(
-                    title='Welcome to CS101!',
-                    content='Welcome to Introduction to Programming. Please check the syllabus on the course page.',
-                    poster_id=3,  # Dr. Sarah Johnson
-                    course_id=1   # CS101
-                ),
-                Announcement(
-                    title='Office Hours Change',
-                    content='My office hours have changed to Tuesdays 2-4 PM instead of Thursdays.',
-                    poster_id=3,  # Dr. Sarah Johnson
-                    course_id=1   # CS101
-                ),
-                Announcement(
-                    title='Important: Textbook Update',
-                    content='The required textbook has been updated. Please check the resources page.',
-                    poster_id=4,  # Prof. Robert Smith
-                    course_id=3   # CS301
-                ),
-                Announcement(
-                    title='Midterm Exam Schedule',
-                    content='The midterm exam will be held in the main lecture hall on November 20th.',
-                    poster_id=5,  # Dr. Jennifer Lee
-                    course_id=4   # MATH101
-                ),
-            ]
-            
-            for announcement in announcements:
-                db.session.add(announcement)
-            
-            db.session.commit()
-            print(f"✅ Added {len(announcements)} announcements")
-            
-            # 6. Add Submissions (requires assignments and users to exist)
+            # 5. Add Submissions
             print("Adding submissions...")
             
             submissions = [
+                # CS101 submissions (for Alex Chen to grade)
                 Submission(
-                    assignment_id=1,  # Python Basics Assignment
-                    student_id=8,     # John Doe
+                    assignment_id=cs101_assignment1.id,
+                    student_id=john.id,
                     submission_text='def factorial(n):\n    if n == 0:\n        return 1\n    return n * factorial(n-1)',
                     grade=95.0,
-                    feedback='Excellent implementation! Good use of recursion.'
+                    feedback='Excellent work! Perfect recursive implementation.'
                 ),
                 Submission(
-                    assignment_id=1,  # Python Basics Assignment
-                    student_id=9,     # Jane Smith
-                    submission_text='def factorial(num):\n    result = 1\n    for i in range(1, num+1):\n        result *= i\n    return result',
-                    grade=88.5,
-                    feedback='Good iterative solution. Consider adding input validation.'
+                    assignment_id=cs101_assignment1.id,
+                    student_id=jane.id,
+                    submission_text='def calculate_average(numbers):\n    return sum(numbers) / len(numbers)',
+                    grade=88.0,
+                    feedback='Good implementation. Add input validation.'
                 ),
                 Submission(
-                    assignment_id=3,  # Linked List Implementation
-                    student_id=8,     # John Doe
-                    submission_text='class Node:\n    def __init__(self, data):\n        self.data = data\n        self.next = None',
-                    grade=92.0,
-                    feedback='Good start. Please complete the linked list operations.'
-                ),
-                Submission(
-                    assignment_id=4,  # Database Design Project
-                    student_id=9,     # Jane Smith
-                    submission_text='CREATE TABLE books (id INT PRIMARY KEY, title VARCHAR(255), author VARCHAR(255));',
-                    grade=None,  # Not graded yet
+                    assignment_id=cs101_assignment1.id,
+                    student_id=mike.id,
+                    submission_text='# Working on it',
+                    grade=None,
                     feedback=None
                 ),
+                
+                # CS201 submissions (for Lisa Wang to grade)
                 Submission(
-                    assignment_id=5,  # Calculus Problem Set 1
-                    student_id=10,    # Mike Johnson
-                    submission_text='∫ x² dx = (1/3)x³ + C',
-                    grade=85.0,
-                    feedback='Correct integration. Remember to include the constant of integration.'
+                    assignment_id=cs201_assignment1.id,
+                    student_id=john.id,
+                    submission_text='class Node:\n    def __init__(self, data):\n        self.data = data\n        self.next = None',
+                    grade=92.0,
+                    feedback='Good start. Complete the linked list operations.'
+                ),
+                
+                # CS301 submissions (for Michael Brown to grade)
+                Submission(
+                    assignment_id=cs301_assignment1.id,
+                    student_id=jane.id,
+                    submission_text='SELECT * FROM students WHERE grade > 80',
+                    grade=None,
+                    feedback=None
                 ),
             ]
             
             for submission in submissions:
                 db.session.add(submission)
-            
             db.session.commit()
+            
             print(f"✅ Added {len(submissions)} submissions")
+            
+            # 6. Add Announcements
+            print("Adding announcements...")
+            
+            announcements = [
+                # Posted by Alex Chen (TA for CS101)
+                Announcement(
+                    title='Office Hours This Week',
+                    content='My office hours will be extended on Wednesday 2-4 PM for assignment help.',
+                    poster_id=alex_ta.id,
+                    course_id=cs101.id
+                ),
+                Announcement(
+                    title='Assignment 1 Graded',
+                    content='Assignment 1 has been graded. Check your grades and feedback.',
+                    poster_id=alex_ta.id,
+                    course_id=cs101.id
+                ),
+                
+                # Posted by instructor
+                Announcement(
+                    title='Welcome to CS101!',
+                    content='Welcome to Introduction to Programming. Please check the syllabus.',
+                    poster_id=dr_sarah.id,
+                    course_id=cs101.id
+                ),
+            ]
+            
+            for announcement in announcements:
+                db.session.add(announcement)
+            db.session.commit()
+            
+            print(f"✅ Added {len(announcements)} announcements")
             
             print("\n" + "="*60)
             print("DUMMY DATA ADDED SUCCESSFULLY!")
@@ -428,31 +455,29 @@ def init_database():
             print("\n🔑 TEST CREDENTIALS:")
             print("   Admin:      admin@university.edu / admin123")
             print("   Instructor: sarah@instructor.edu / prof123")
-            print("   TA:         alex@ta.edu / ta123")
+            print("   TA:         alex@ta.edu / ta123 (CS101 TA)")
             print("   Student:    john@student.edu / student123")
             
             print("\n📊 DATABASE SUMMARY:")
-            print(f"   Users: {len(users)} (2 admin, 3 instructors, 2 TAs, 5 students)")
-            print(f"   Courses: {len(courses)}")
+            print(f"   Users: 18 total")
+            print(f"   Courses: 5 (each with one TA)")
             print(f"   Enrollments: {len(enrollments)}")
             print(f"   Assignments: {len(assignments)}")
-            print(f"   Announcements: {len(announcements)}")
             print(f"   Submissions: {len(submissions)}")
+            print(f"   Announcements: {len(announcements)}")
             
-            print("\n📚 COURSE ENROLLMENTS:")
-            course_info = [
-                ("CS101", 4, 30, "Dr. Sarah Johnson", "Alex Chen"),
-                ("CS201", 3, 25, "Dr. Sarah Johnson", "Alex Chen"),
-                ("CS301", 3, 28, "Prof. Robert Smith", "Lisa Wang"),
-                ("MATH101", 3, 35, "Dr. Jennifer Lee", "None"),
-                ("MATH201", 2, 30, "Dr. Jennifer Lee", "None"),
-            ]
-            for code, enrolled, max_seats, instructor, ta in course_info:
-                print(f"   {code}: {enrolled}/{max_seats} students, Instructor: {instructor}, TA: {ta}")
+            print("\n📚 COURSE ASSIGNMENTS:")
+            print("   CS101 (Alex Chen): 5 students, 2 assignments, 3 submissions")
+            print("   CS201 (Lisa Wang): 4 students, 1 assignment, 1 submission")
+            print("   CS301 (Michael Brown): 4 students, 1 assignment, 1 submission")
+            print("   MATH101 (Sarah Davis): 5 students, 0 assignments")
+            print("   MATH201 (David Wilson): 4 students, 0 assignments")
             
-        except exc.IntegrityError as e:
-            print(f"❌ Integrity Error (constraint violation): {e}")
-            db.session.rollback()
+            print("\n🎯 TA GRADING READY:")
+            print("   • Alex Chen can grade submissions in CS101")
+            print("   • Lisa Wang can grade submissions in CS201")
+            print("   • Michael Brown can grade submissions in CS301")
+            
         except Exception as e:
             print(f"❌ Error adding dummy data: {e}")
             import traceback

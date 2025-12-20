@@ -1,79 +1,61 @@
 from models.user import User
+from extensions import db
+from models.enrollment import Enrollment
 
 class Student(User):
-    def __init__(self, id, name, email, password, major, level):
-        super().__init__(id, name, email, password, "student")
+    def __init__(self, id, name, email, major, level):
+        self.id = id
+        self.name = name
+        self.email = email
         self.major = major
         self.level = level
-        self.enrolled_courses = []
     
-    def enroll_course(self, course_id):
-        from models.courses import Course
-        course = Course.get_by_id(course_id)
-        
-        if not course:
-            return False, "Course not found"
-        
-        if course.seats_left <= 0:
-            return False, "No seats available"
-        
-        if course_id in self.enrolled_courses:
-            return False, "Already enrolled"
-        
-        self.enrolled_courses.append(course_id)
-        course.enrolled_students.append(self.id)
-        course.seats_left -= 1
-        return True, "Enrolled successfully"
+    @staticmethod
+    def get_by_id(student_id):
+        """Get student by ID - query the database"""
+        user = User.query.get(student_id)
+        if user and user.role == 'student':
+            # You might want to store major and level in User model or separate table
+            return Student(user.id, user.name, user.email, "N/A", "N/A")
+        return None
     
-    def drop_course(self, course_id):
-        if course_id in self.enrolled_courses:
-            self.enrolled_courses.remove(course_id)
-            
-            from models.courses import Course
-            course = Course.get_by_id(course_id)
-            if course:
-                if self.id in course.enrolled_students:
-                    course.enrolled_students.remove(self.id)
-                course.seats_left += 1
-            return True, "Course dropped"
-        return False, "Not enrolled in this course"
+    @staticmethod
+    def get_all_students():
+        """Get all students"""
+        users = User.query.filter_by(role='student').all()
+        students = []
+        for user in users:
+            students.append(Student(user.id, user.name, user.email, "N/A", "N/A"))
+        return students
     
     def get_enrolled_courses(self):
+        """Get courses this student is enrolled in"""
         from models.courses import Course
+        enrollments = Enrollment.query.filter_by(student_id=self.id).all()
         courses = []
-        for course_id in self.enrolled_courses:
-            course = Course.get_by_id(course_id)
+        for enrollment in enrollments:
+            course = Course.get_by_id(enrollment.course_id)
             if course:
                 courses.append(course)
         return courses
     
     def is_enrolled_in_course(self, course_id):
-        return course_id in self.enrolled_courses
-    
-    def get_assignment_status(self, assignment_id):
-        from models.assignment import Assignment
-        assignment = Assignment.get_by_id(assignment_id)
-        if assignment:
-            return assignment.get_submission_status(self.id)
-        return {'submitted': False, 'grade': None, 'timestamp': None}
+        """Check if student is enrolled in a course"""
+        enrollment = Enrollment.query.filter_by(
+            student_id=self.id,
+            course_id=course_id
+        ).first()
+        return enrollment is not None
     
     @staticmethod
-    def get_by_id(student_id):
-        students = [
-            Student(1, "John Doe", "john@student.edu", "pass123", "Computer Science", "Sophomore"),
-            Student(5, "Jane Smith", "jane@student.edu", "pass123", "Mathematics", "Junior"),
-            Student(6, "Mike Johnson", "mike@student.edu", "pass123", "Physics", "Freshman")
-        ]
+    def search_students(query=""):
+        """Search students by name or email"""
+        users = User.query.filter(
+            User.role == 'student',
+            (User.name.ilike(f"%{query}%") | User.email.ilike(f"%{query}%"))
+        ).all()
         
-        for student in students:
-            if student.id == student_id:
-                return student
-        return None
-    
-    @staticmethod
-    def get_all_students():
-        return [
-            Student(1, "John Doe", "john@student.edu", "pass123", "Computer Science", "Sophomore"),
-            Student(5, "Jane Smith", "jane@student.edu", "pass123", "Mathematics", "Junior"),
-            Student(6, "Mike Johnson", "mike@student.edu", "pass123", "Physics", "Freshman")
-        ]
+        students = []
+        for user in users:
+            students.append(Student(user.id, user.name, user.email, "N/A", "N/A"))
+        return students

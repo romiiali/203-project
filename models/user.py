@@ -151,5 +151,23 @@ class User(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
     
+        # Add these methods to User class
+
+    def get_assigned_courses_as_ta(self):
+        """Get courses where this user is the TA"""
+        from models.courses import Course
+        return Course.query.filter_by(ta_id=self.id).all()
+    
+    def is_ta_for_course(self, course_id):
+        """Check if user is TA for a specific course"""
+        from models.courses import Course
+        course = Course.query.get(course_id)
+        return course and course.ta_id == self.id
+    
+    def get_ta_courses(self):
+        """Get courses where user is TA (alias for compatibility)"""
+        return self.get_assigned_courses_as_ta()
+    
+
     def __repr__(self):
         return f'<User {self.name} ({self.role})>'

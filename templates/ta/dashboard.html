@@ -7,47 +7,74 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="container mt-4">
-        <div class="card shadow-sm border-info">
-            <div class="card-header bg-info">
-                <h4 class="mb-0">👨‍🏫 TA Dashboard</h4>
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mt-3">
-                        <thead class="table-light">
-                            {% if course %}
-                            <tr>
-                                <td><strong>{{ course.code }}</strong></td>
-                                <td>{{ course.name }}</td>
-                            </tr>
-                            <div class="row mb-4">
-                            <div class="col-md-6 mb-2">
-                                <a href="/ta/student_list" class="btn btn-outline-primary w-100 p-4 shadow-sm">
-                                    <div style="font-size: 2em; margin-bottom: 10px;">🔍</div>
-                                    <strong class="fs-5">View Studtent List</strong>
-                                </a>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <a href="/ta/post_assignment" class="btn btn-outline-success w-100 p-4 shadow-sm">
-                                    <div style="font-size: 2em; margin-bottom: 10px;">👥</div>
-                                    <strong class="fs-5">Post Assignment</strong>
-                                </a>
-                            </div>
-                            <div class="col-md-6 mb-2">
-                                <a href="/ta/post_announcment" class="btn btn-outline-success w-100 p-4 shadow-sm">
-                                    <div style="font-size: 2em; margin-bottom: 10px;">👥</div>
-                                    <strong class="fs-5">Post Announcment</strong>
-                                </a>
-                            </div>
-                        </div>
-                            {% else %}
-                            <tr>
-                                <td colspan="3" class="text-center py-4 text-muted">No courses assigned to you yet.</td>
-                            </tr>
-                            {% endif %}
-                        </thead>
-                    </table>
+
+<div class="container mt-5">
+    <div class="card shadow-sm border-info">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">👨‍🏫 TA Dashboard</h4>
+            <small class="text-white-50">
+                {% if ta %}
+                    Welcome, {{ ta.name }}
+                {% endif %}
+            </small>
+        </div>
+
+        <div class="card-body">
+            {% if course %}
+                <div class="mb-4">
+                    <h5 class="mb-1">{{ course.code }}</h5>
+                    <p class="text-muted mb-0">{{ course.name }}</p>
+                    <p class="mb-0">
+                        <strong>Instructor:</strong> 
+                        {% if course.instructor %}
+                            {{ course.instructor.name }}
+                        {% else %}
+                            Not assigned
+                        {% endif %}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Department:</strong> {{ course.department }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Credits:</strong> {{ course.credits }}
+                    </p>
+                    <p class="mb-0">
+                        <strong>Schedule:</strong> {{ course.schedule }}
+                    </p>
                 </div>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <a href="/ta/student_list" class="btn btn-outline-primary w-100 p-4">
+                            <div class="fs-2 mb-2">🔍</div>
+                            <strong>View Student List</strong>
+                        </a>
+                    </div>
+
+                    <div class="col-md-6">
+                        <a href="/ta/post_assignment" class="btn btn-outline-success w-100 p-4">
+                            <div class="fs-2 mb-2">📝</div>
+                            <strong>Post Assignment</strong>
+                        </a>
+                    </div>
+
+                    <div class="col-md-6">
+                        <a href="/ta/post_announcement" class="btn btn-outline-warning w-100 p-4">
+                            <div class="fs-2 mb-2">📢</div>
+                            <strong>Post Announcement</strong>
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-3" style="font-size: 4em; color: #999;">📚</div>
+                    <h5 class="text-muted mb-3">No course assigned to you yet.</h5>
+                    <p class="text-muted">Please contact your administrator to get assigned to a course.</p>
+                </div>
+            {% endif %}
         </div>
     </div>
+</div>
 </body>
 </html>
+

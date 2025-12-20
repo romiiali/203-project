@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post Assignment</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow border-info">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">📝 Post New Assignment</h4>
+                        <a href="/ta" class="btn btn-light btn-sm">← Back to Dashboard</a>
+                    </div>
+                    
+                    <div class="card-body">
+                        <form method="POST" action="/ta/post_assignment">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Assignment Title *</label>
+                                <input type="text" name="title" class="form-control" 
+                                       placeholder="Enter assignment title" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Description *</label>
+                                <textarea name="description" class="form-control" rows="4" 
+                                          placeholder="Enter assignment description, requirements, and instructions..." required></textarea>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Due Date *</label>
+                                    <input type="datetime-local" name="due_date" class="form-control" required>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold">Max Points</label>
+                                    <input type="number" name="max_points" class="form-control" 
+                                           min="1" max="1000" value="100" required>
+                                    <small class="text-muted">Maximum points for this assignment</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Course *</label>
+                                <select name="course_id" class="form-control" required>
+                                    {% if courses %}
+                                        {% for course_option in courses %}
+                                            <option value="{{ course_option.id }}">
+                                                {{ course_option.code }} - {{ course_option.name }}
+                                            </option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="" disabled>No courses assigned</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+
+                            <!-- Flash Messages -->
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ 'warning' if category == 'error' else category }} mb-3">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <a href="/ta" class="btn btn-secondary">Cancel</a>
+                                <button type="submit" class="btn btn-success">
+                                    📤 Post Assignment
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

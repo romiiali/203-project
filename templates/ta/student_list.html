@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Student</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold text-success mb-1">👥 Search Students</h3>
+                <p class="text-muted mb-0">
+                    Search for students in your assigned courses
+                    {% if course %}
+                        - Currently viewing: {{ course.code }}
+                    {% endif %}
+                </p>
+            </div>
+            <a href="/ta" class="btn btn-outline-secondary">← Back to Dashboard</a>
+        </div>
+
+        <!-- Search Form -->
+        <div class="card bg-light mb-4 shadow-sm">
+            <div class="card-body">
+                <form method="POST" action="/ta/student_list" class="d-flex gap-2">
+                    <input type="text" name="query" class="form-control" 
+                           placeholder="Enter Student Name, Email, or ID" required 
+                           value="{{ request.form.get('query', '') }}">
+                    <button type="submit" class="btn btn-success px-4">
+                        🔍 Search
+                    </button>
+                    <a href="/ta/student_list" class="btn btn-outline-secondary">
+                        Clear
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'warning' if category == 'error' else category }} mb-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Results Table -->
+        {% if results %}
+        <div class="card shadow-sm">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">ID</th>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Major</th>
+                                <th>Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in results %}
+                            <tr>
+                                <td class="ps-4">{{ student.id }}</td>
+                                <td class="fw-bold">{{ student.name }}</td>
+                                <td>{{ student.email }}</td>
+                                <td>
+                                    <span class="badge bg-info">{{ student.major }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ student.level }}</span>
+                                </td>
+                                <td>
+                                    {% if course %}
+                                        <a href="/ta/course/{{ course.id }}/student/{{ student.id }}" 
+                                           class="btn btn-sm btn-outline-success">
+                                            👤 View Profile
+                                        </a>
+                                    {% else %}
+                                        <a href="/ta/student_list" 
+                                           class="btn btn-sm btn-outline-secondary disabled">
+                                            Select Course First
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% elif request.method == 'POST' %}
+        <div class="alert alert-warning text-center py-4">
+            <div class="mb-2" style="font-size: 2em;">🔍</div>
+            <h5>No students found</h5>
+            <p class="text-muted mb-0">Try searching with a different name or email.</p>
+        </div>
+        {% endif %}
+
+        <!-- No Search Yet -->
+        {% if not results and request.method != 'POST' %}
+        <div class="card shadow-sm border-0 bg-light">
+            <div class="card-body text-center py-5">
+                <div class="mb-3" style="font-size: 3em; color: #999;">👥</div>
+                <h5 class="text-muted">Search for Students</h5>
+                <p class="text-muted mb-0">
+                    Enter a student's name, email, or ID in the search box above.
+                </p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

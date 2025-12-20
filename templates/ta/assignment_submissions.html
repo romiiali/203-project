@@ -8,20 +8,71 @@
 </head>
 <body>
     <div class="container mt-4">
+        <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h6 class="text-muted mb-1">Grading Assignment</h6>
                 <h3 class="fw-bold">{{ assignment.title }}</h3>
+                <p class="text-muted mb-0">
+                    Due: {{ assignment.due_date.strftime('%B %d, %Y at %I:%M %p') if assignment.due_date else 'No due date' }}
+                </p>
             </div>
-            <a href="/ta/course/{{ assignment.course_id }}" class="btn btn-secondary btn-sm">
-                ← Back to Course
-            </a>
+            <div>
+                <a href="/ta" class="btn btn-secondary btn-sm">
+                    ← Back to Dashboard
+                </a>
+            </div>
         </div>
 
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'warning' if category == 'error' else category }} mb-3">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Assignment Info -->
+        <div class="card shadow-sm mb-4 border-primary">
+            <div class="card-body">
+                <h6 class="text-muted">Assignment Description:</h6>
+                <p>{{ assignment.description }}</p>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="fw-bold">{{ submissions|length }}</div>
+                        <small class="text-muted">Submissions</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="fw-bold">
+                            {{ submissions|selectattr('grade', 'defined')|list|length }}
+                        </div>
+                        <small class="text-muted">Graded</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="fw-bold">
+                            {% set graded_subs = submissions|selectattr('grade', 'defined')|list %}
+                            {% if graded_subs %}
+                                {{ (graded_subs|map(attribute='grade')|sum / graded_subs|length)|round(1) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </div>
+                        <small class="text-muted">Avg Grade</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submissions Table -->
         <div class="card shadow border-top border-4 border-primary">
             <div class="card-header">
                 <h5 class="mb-0">Student Submissions</h5>
+                <small class="text-muted">Click Save to grade each submission</small>
             </div>
+            
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
@@ -29,7 +80,7 @@
                             <tr>
                                 <th class="ps-4">Student Name</th>
                                 <th>Submission Info</th>
-                                <th>Download</th>
+                                <th>Status</th>
                                 <th style="width: 300px;">Grade & Feedback</th>
                                 <th>Action</th>
                             </tr>
@@ -42,27 +93,40 @@
                                     <small class="text-muted">{{ sub.student.email }}</small>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light">{{ sub.submission_date }}</span>
+                                    <div class="d-flex flex-column">
+                                        <span class="badge bg-light mb-1">
+                                            {{ sub.submission_date }}
+                                        </span>
+                                        <small class="text-muted">
+                                            {% if sub.submission_text %}
+                                                {{ sub.submission_text|truncate(50) }}
+                                            {% else %}
+                                                No submission text
+                                            {% endif %}
+                                        </small>
+                                    </div>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary" title="Download File">
-                                        ↓ File
-                                    </button>
+                                    {% if sub.grade is not none %}
+                                        <span class="badge bg-success">Graded</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
                                 </td>
                                 <form method="POST" action="/ta/submission/{{ sub.id }}/grade">
                                     <td>
                                         <div class="input-group input-group-sm mb-1">
                                             <span class="input-group-text fw-bold">Score</span>
-                                            <input type="number" name="grade" class="form-control" value="{{ sub.grade }}"
-                                                placeholder="0" min="0" max="100" required>
+                                            <input type="number" name="grade" class="form-control" 
+                                                   value="{{ sub.grade if sub.grade is not none else '' }}"
+                                                   placeholder="0" min="0" max="100" required>
                                         </div>
-                                        <input type="text" name="feedback" class="form-control form-control-sm"
-                                            value="{{ sub.feedback if sub.feedback else '' }}"
-                                            placeholder="Add feedback (optional)...">
+                                        <textarea name="feedback" class="form-control form-control-sm" rows="2"
+                                                  placeholder="Add feedback (optional)...">{{ sub.feedback if sub.feedback else '' }}</textarea>
                                     </td>
                                     <td>
                                         <button type="submit" class="btn btn-success btn-sm">
-                                            Save
+                                            💾 Save
                                         </button>
                                     </td>
                                 </form>
@@ -70,8 +134,11 @@
                             {% else %}
                             <tr>
                                 <td colspan="5" class="text-center py-5 text-muted">
-                                    <div class="mb-3">📭</div>
-                                    No submissions received for this assignment yet.
+                                    <div class="mb-3" style="font-size: 3em;">📭</div>
+                                    <h5>No submissions received yet</h5>
+                                    <p class="text-muted mb-0">
+                                        Students haven't submitted their work for this assignment.
+                                    </p>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -79,7 +146,33 @@
                     </table>
                 </div>
             </div>
+            
+            <!-- Bulk Actions -->
+            {% if submissions %}
+            <div class="card-footer bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        Showing {{ submissions|length }} submission{{ 's' if submissions|length != 1 else '' }}
+                    </small>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="saveAllGrades()">
+                            💾 Save All Grades
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
+
+    <script>
+        function saveAllGrades() {
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.requestSubmit();
+            });
+            alert('All grades are being saved...');
+        }
+    </script>
 </body>
 </html>

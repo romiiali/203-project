@@ -10,23 +10,115 @@
     <div class="container mt-4">
         <div class="card shadow">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">🎓 Student Profile</h4>
-                <a href="/ta/search_student" class="btn btn-light btn-sm">Back to Search</a>
+                <div>
+                    <h4 class="mb-0">🎓 Student Profile</h4>
+                    {% if current_course_id %}
+                        <small class="text-muted">
+                            <a href="/ta/course/{{ current_course_id }}" class="text-white">
+                                Back to Course
+                            </a>
+                        </small>
+                    {% endif %}
+                </div>
+                <a href="/ta/student_list" class="btn btn-light btn-sm">← Back to Search</a>
             </div>
-            <div class="card-body text-center py-5">
-                <div class="mb-3">
-                    <div style="font-size: 4em; color: #666;">👤</div>
-                </div>
-                <h3>{{ student.name }}</h3>
-                <p class="text-muted">{{ student.email }}</p>
-                <span class="badge bg-success">Active Student</span>
+            
+            <div class="card-body">
+                {% if student %}
+                    <!-- Student Info -->
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <div class="mb-3">
+                                <div style="font-size: 4em; color: #666;">👤</div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <h3>{{ student.name }}</h3>
+                            <p class="text-muted mb-2">
+                                <strong>Email:</strong> {{ student.email }}
+                            </p>
+                            <p class="mb-2">
+                                <strong>Student ID:</strong> 
+                                <span class="badge bg-primary">{{ student.id }}</span>
+                            </p>
+                            <p class="mb-2">
+                                <strong>Role:</strong> 
+                                <span class="badge bg-success">{{ student.role|capitalize }}</span>
+                            </p>
+                            {% if student.major and student.major != 'N/A' %}
+                            <p class="mb-2">
+                                <strong>Major:</strong> 
+                                <span class="badge bg-info">{{ student.major }}</span>
+                            </p>
+                            {% endif %}
+                            {% if student.level and student.level != 'N/A' %}
+                            <p class="mb-2">
+                                <strong>Level:</strong> 
+                                <span class="badge bg-secondary">{{ student.level }}</span>
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                <hr class="my-4">
+                    <hr class="my-4">
 
-                <h5 class="text-start mb-3">📚 Enrolled Courses</h5>
-                <div class="alert alert-info">
-                    Courses list will appear here after linking Enrollments database.
-                </div>
+                    <!-- Enrolled Courses -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">📚 Enrolled Courses</h5>
+                        {% if courses %}
+                            <div class="row">
+                                {% for course in courses %}
+                                    <div class="col-md-6 mb-3">
+                                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>{{ course.code }}</strong> - {{ course.name }}
+                                                <br>
+                                                <small class="text-muted">
+                                                    {{ course.department }} • {{ course.credits }} credits
+                                                </small>
+                                            </div>
+                                            <a href="/ta/course/{{ course.id }}" 
+                                               class="btn btn-sm btn-outline-info">
+                                                View
+                                            </a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                This student is not enrolled in any courses yet.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="border-top pt-3">
+                        <h6 class="mb-3">Quick Actions</h6>
+                        <div class="d-flex gap-2">
+                            {% if current_course_id %}
+                                <a href="/ta/course/{{ current_course_id }}/gradebook" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    📊 View Grades
+                                </a>
+                            {% endif %}
+                            <a href="mailto:{{ student.email }}" 
+                               class="btn btn-sm btn-outline-success">
+                                📧 Email Student
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- No Student Found -->
+                    <div class="text-center py-5">
+                        <div class="mb-3" style="font-size: 4em; color: #999;">😕</div>
+                        <h3>Student Not Found</h3>
+                        <p class="text-muted">The requested student profile could not be found.</p>
+                        <a href="/ta/student_list" class="btn btn-primary">
+                            ← Back to Student Search
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

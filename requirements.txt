@@ -4,6 +4,8 @@ itsdangerous
 click
 blinker
 
+pyodbc==4.0.39
+
 Flask
 Flask-SQLAlchemy
 pyodbc

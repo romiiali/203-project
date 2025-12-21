@@ -2,9 +2,7 @@ from models.user import User
 from extensions import db
 
 class Instructor(User):
-    __mapper_args__ = {
-        'polymorphic_identity': 'instructor'
-    }
+    
     
     def __init__(self, name, email, password=None, office=None, office_hours=None):
         super().__init__(name=name, email=email, role='instructor', 

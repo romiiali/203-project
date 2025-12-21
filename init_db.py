@@ -1,5 +1,6 @@
 import sys
 import os
+from models.user import User
 
 # Add the current directory to the Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -44,7 +45,6 @@ def verify_database():
                     print(f"❌ {table}: Error - {e}")
             
             # Test login with dummy user
-            from models.user import User
             user = User.query.filter_by(email='admin@university.edu').first()
             if user and user.check_password('password123'):
                 print(f"✅ Authentication test: Admin user password works")

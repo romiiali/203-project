@@ -4,9 +4,6 @@ from extensions import db
 from models.student import Student
 from models.ta import TA    
 class Admin(User):
-    __mapper_args__ = {
-        'polymorphic_identity': 'admin'
-    }
     
     def __init__(self, name, email, password=None):
         super().__init__(name=name, email=email, role='admin', password=password)

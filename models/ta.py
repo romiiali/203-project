@@ -3,9 +3,7 @@ from models.courses import Course
 from extensions import db
 
 class TA(User):
-    __mapper_args__ = {
-        'polymorphic_identity': 'ta'
-    }
+   
     
     def __init__(self, name, email, password=None, office=None, office_hours=None):
         super().__init__(name=name, email=email, role='ta', 

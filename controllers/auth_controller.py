@@ -13,7 +13,6 @@ def login():
         if user:
             session['user_id'] = user.id
             session['role'] = user.role
-            
             if user.role == 'student':
                 return redirect('/student/dashboard')
             elif user.role == 'instructor':
@@ -22,8 +21,8 @@ def login():
                 return redirect('/ta/dashboard')
             elif user.role == 'admin':
                 return redirect('/admin/dashboard')
-            else:
-                flash("Invalid email or password", "error")  # <-- This is in the wrong place!
+        else:
+            flash("Invalid email or password", "error")  # <-- This is in the wrong place!
     
     return render_template('auth/login.html')
 

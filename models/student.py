@@ -2,9 +2,7 @@ from models.user import User
 from extensions import db
 
 class Student(User):
-    __mapper_args__ = {
-        'polymorphic_identity': 'student'
-    }
+    
     
     def __init__(self, name, email, password=None, major=None, level=None):
         super().__init__(name=name, email=email, role='student', 

@@ -20,107 +20,150 @@
     
 #     return render_template('instructor/dashboard.html', courses=courses)
 
-# @instructor_bp.route('/course/<int:course_id>')
-# def course_details(course_id):
-#     if 'user_id' not in session or session.get('role') != 'instructor':
-#         return redirect('/login')
+@instructor_bp.route('/course/<int:course_id>')
+def course_details(course_id):
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        return redirect('/login')
     
-#     course = Course.get_by_id(course_id)
-#     if not course:
-#         flash("Course not found", "error")
-#         return redirect(url_for('instructor.dashboard'))
+    course = Course.get_by_id(course_id)
+    if not course:
+        flash("Course not found", "error")
+        return redirect(url_for('instructor.dashboard'))
     
-#     # Check if instructor teaches this course
-#     instructor = Instructor.get_by_id(session['user_id'])
-#     if course_id not in instructor.teaching_courses:
-#         flash("You don't teach this course", "error")
-#         return redirect(url_for('instructor.dashboard'))
+    # Check if instructor teaches this course
+    instructor = Instructor.get_by_id(session['user_id'])
+    if not instructor.is_teaching_course(course_id):
+        flash("You don't teach this course", "error")
+        return redirect(url_for('instructor.dashboard'))
     
-#     announcements = course.get_announcements()
-#     assignments = course.get_assignments()
-#     students = course.get_enrolled_students()
+    announcements = course.get_announcements()
+    assignments = course.get_assignments()
+    students = course.get_enrolled_students()
     
-#     return render_template('instructor/course_details.html', 
-#                          course=course, 
-#                          announcements=announcements,
-#                          assignments=assignments,
-#                          students=students)
+    return render_template('instructor/course_details.html', 
+                         course=course, 
+                         announcements=announcements,
+                         assignments=assignments,
+                         students=students)
 
-# @instructor_bp.route('/course/<int:course_id>/add_assignment', methods=['POST'])
-# def add_assignment(course_id):
-#     if 'user_id' not in session or session.get('role') != 'instructor':
-#         return redirect('/login')
+@instructor_bp.route('/course/<int:course_id>/add_assignment', methods=['POST'])
+def add_assignment(course_id):
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        return redirect('/login')
     
-#     course = Course.get_by_id(course_id)
-#     if not course:
-#         flash("Course not found", "error")
-#         return redirect(url_for('instructor.dashboard'))
+    course = Course.get_by_id(course_id)
+    if not course:
+        flash("Course not found", "error")
+        return redirect(url_for('instructor.dashboard'))
     
-#     title = request.form.get('title')
-#     description = request.form.get('description')
-#     due_date = request.form.get('due_date')
+    # Check if instructor teaches this course
+    instructor = Instructor.get_by_id(session['user_id'])
+    if not instructor.is_teaching_course(course_id):
+        flash("You don't teach this course", "error")
+        return redirect(url_for('instructor.dashboard'))
     
-#     if title and description and due_date:
-#         assignment = course.add_assignment(title, description, due_date)
-#         flash('Assignment added successfully!', 'success')
-#     else:
-#         flash('Please fill all fields', 'error')
+    title = request.form.get('title')
+    description = request.form.get('description')
+    due_date = request.form.get('due_date')
     
-#     return redirect(url_for('instructor.course_details', course_id=course_id))
+    if title and description and due_date:
+        assignment = course.add_assignment(title, description, due_date)
+        if assignment:
+            flash('Assignment added successfully!', 'success')
+        else:
+            flash('Failed to add assignment', 'error')
+    else:
+        flash('Please fill all fields', 'error')
+    
+    return redirect(url_for('instructor.course_details', course_id=course_id))
 
-# @instructor_bp.route('/course/<int:course_id>/add_announcement', methods=['POST'])
-# def add_announcement(course_id):
-#     if 'user_id' not in session or session.get('role') != 'instructor':
-#         return redirect('/login')
+@instructor_bp.route('/course/<int:course_id>/add_announcement', methods=['POST'])
+def add_announcement(course_id):
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        return redirect('/login')
     
-#     course = Course.get_by_id(course_id)
-#     if not course:
-#         flash("Course not found", "error")
-#         return redirect(url_for('instructor.dashboard'))
+    course = Course.get_by_id(course_id)
+    if not course:
+        flash("Course not found", "error")
+        return redirect(url_for('instructor.dashboard'))
     
-#     title = request.form.get('title')
-#     content = request.form.get('content')
+    # Check if instructor teaches this course
+    instructor = Instructor.get_by_id(session['user_id'])
+    if not instructor.is_teaching_course(course_id):
+        flash("You don't teach this course", "error")
+        return redirect(url_for('instructor.dashboard'))
     
-#     if title and content:
-#         announcement = course.add_announcement(title, content, session['user_id'])
-#         flash('Announcement added successfully!', 'success')
-#     else:
-#         flash('Please fill all fields', 'error')
+    title = request.form.get('title')
+    content = request.form.get('content')
     
-#     return redirect(url_for('instructor.course_details', course_id=course_id))
+    if title and content:
+        announcement = course.add_announcement(title, content, session['user_id'])
+        if announcement:
+            flash('Announcement added successfully!', 'success')
+        else:
+            flash('Failed to add announcement', 'error')
+    else:
+        flash('Please fill all fields', 'error')
+    
+    return redirect(url_for('instructor.course_details', course_id=course_id))
 
-# @instructor_bp.route('/assignment/<int:assignment_id>/submissions')
-# def view_submissions(assignment_id):
-#     if 'user_id' not in session or session.get('role') != 'instructor':
-#         return redirect('/login')
+@instructor_bp.route('/assignment/<int:assignment_id>/submissions')
+def view_submissions(assignment_id):
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        return redirect('/login')
     
-#     assignment = Assignment.get_by_id(assignment_id)
-#     if not assignment:
-#         flash("Assignment not found", "error")
-#         return redirect(url_for('instructor.dashboard'))
+    assignment = Assignment.get_by_id(assignment_id)
+    if not assignment:
+        flash("Assignment not found", "error")
+        return redirect(url_for('instructor.dashboard'))
     
-#     # Get all submissions
-#     submissions_data = assignment.get_all_submissions()
+    # Check if instructor teaches the course this assignment belongs to
+    instructor = Instructor.get_by_id(session['user_id'])
+    course = Course.get_by_id(assignment.course_id)
     
-#     # Convert to list of submission objects with student info
-#     from models.student import Student
-#     submissions = []
-#     for student_id, submission_info in submissions_data.items():
-#         student = Student.get_by_id(student_id)
-#         if student:
-#             submissions.append({
-#                 'student': student,
-#                 'grade': submission_info.get('grade'),
-#                 'feedback': submission_info.get('feedback'),
-#                 'timestamp': submission_info.get('timestamp'),
-#                 'text': submission_info.get('text'),
-#                 'id': student_id
-#             })
+    if not course or not instructor.is_teaching_course(course.id):
+        flash("You don't teach this course", "error")
+        return redirect(url_for('instructor.dashboard'))
     
-#     # Get course info
-#     course = Course.get_by_id(assignment.course_id)
+    # Get all submissions with the FIXED format
+    submissions = assignment.get_all_submissions()
     
-#     return render_template('instructor/assignment_submissions.html', 
-#                          assignment=assignment, 
-#                          submissions=submissions,
-#                          course=course)
+    # Get course info
+    course = Course.get_by_id(assignment.course_id)
+    
+    return render_template('instructor/assignment_submissions.html', 
+                         assignment=assignment, 
+                         submissions=submissions,
+                         course=course)
+
+@instructor_bp.route('/submission/<int:submission_id>/grade', methods=['POST'])
+def grade_submission(submission_id):
+    """Grade a specific submission"""
+    if 'user_id' not in session or session.get('role') != 'instructor':
+        return redirect('/login')
+    
+    from models.submission import Submission
+    submission = Submission.query.get(submission_id)
+    
+    if not submission:
+        flash("Submission not found", "error")
+        return redirect(request.referrer or url_for('instructor.dashboard'))
+    
+    # Check if instructor can grade this submission
+    instructor = Instructor.get_by_id(session['user_id'])
+    assignment = Assignment.get_by_id(submission.assignment_id)
+    
+    if not assignment or not instructor.is_teaching_course(assignment.course_id):
+        flash("You don't have permission to grade this submission", "error")
+        return redirect(request.referrer or url_for('instructor.dashboard'))
+    
+    grade = request.form.get('grade')
+    feedback = request.form.get('feedback')
+    
+    if grade:
+        success, message = assignment.grade_submission(submission.student_id, grade, feedback)
+        flash(message, 'success' if success else 'error')
+    else:
+        flash('Grade is required', 'error')
+    
+    return redirect(request.referrer or url_for('instructor.dashboard'))

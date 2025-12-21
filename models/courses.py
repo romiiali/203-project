@@ -1,6 +1,8 @@
 from extensions import db
+from models.announcement import Announcement
+from models.assignment import Assignment
 from models.enrollment import Enrollment
-
+from models.submission import Submission
 class Course(db.Model):
     __tablename__ = 'courses'
     
@@ -15,10 +17,15 @@ class Course(db.Model):
     department = db.Column(db.String(100))
     
     # Foreign keys
-    instructor_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    ta_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    instructor_id = db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
+
+    ta_id = db.Column(db.Integer,db.ForeignKey('users.id'),nullable=True)
+
+    instructor = db.relationship('User',foreign_keys=[instructor_id],back_populates='courses_instructing')
+
+    ta = db.relationship('User',foreign_keys=[ta_id],back_populates='courses_ta')
     
-    # Relationships
+    # Relationships - Use string references
     announcements = db.relationship('Announcement', backref='course', cascade='all, delete-orphan')
     assignments = db.relationship('Assignment', backref='course', cascade='all, delete-orphan')
     enrollments = db.relationship('Enrollment', backref='course', cascade='all, delete-orphan')
@@ -54,32 +61,25 @@ class Course(db.Model):
     
     @staticmethod
     def search_courses(search_term=""):
+        from models.courses import Course
         if not search_term:
             return Course.query.all()
         
         search = f"%{search_term}%"
-        from models.user import User
-        import sqlalchemy as sa
+        from models.courses import Course
         
         return Course.query.filter(
             (Course.code.ilike(search)) |
             (Course.name.ilike(search)) |
             (Course.description.ilike(search)) |
-            (Course.department.ilike(search)) |
-            (sa.exists().where(
-                (User.id == Course.instructor_id) & 
-                (User.name.ilike(search))
-            )) |
-            (sa.exists().where(
-                (User.id == Course.ta_id) & 
-                (User.name.ilike(search))
-            ))
+            (Course.department.ilike(search))
         ).all()
     
     def get_enrolled_students(self):
         """Get enrolled students for this course"""
+        from models.enrollment import Enrollment
         from models.user import User
-        return User.query.join(Enrollment).filter(
+        return db.session.query(User).join(Enrollment).filter(
             Enrollment.course_id == self.id,
             User.role == 'student'
         ).all()
@@ -106,16 +106,67 @@ class Course(db.Model):
             return True
         return False
     
+    def get_announcements(self):
+        """Get announcements for this course"""
+        from models.announcement import Announcement
+        return Announcement.query.filter_by(course_id=self.id).order_by(
+            Announcement.created_at.desc()
+        ).all()
+    
+    def get_assignments(self):
+        """Get assignments for this course"""
+        from models.assignment import Assignment
+        return Assignment.query.filter_by(course_id=self.id).all()
+    
+    def get_ta(self):
+        """Get TA assigned to this course"""
+        from models.user import User
+        return User.query.get(self.ta_id) if self.ta_id else None
+    
+    def get_instructor(self):
+        """Get instructor teaching this course"""
+        from models.user import User
+        return User.query.get(self.instructor_id) if self.instructor_id else None
+    
+    def add_assignment(self, title, description, due_date):
+        """Add assignment to course"""
+        from models.assignment import Assignment
+        assignment = Assignment(
+            title=title,
+            description=description,
+            due_date=due_date,
+            course_id=self.id
+        )
+        db.session.add(assignment)
+        db.session.commit()
+        return assignment
+    
+    def add_announcement(self, title, content, poster_id):
+        """Add announcement to course"""
+        from models.announcement import Announcement
+        announcement = Announcement(
+            title=title,
+            content=content,
+            poster_id=poster_id,
+            course_id=self.id
+        )
+        db.session.add(announcement)
+        db.session.commit()
+        return announcement
+    
     def to_dict(self):
         """Convert course to dictionary"""
         instructor_name = None
         ta_name = None
         
-        if self.instructor:
-            instructor_name = self.instructor.name
+        instructor = self.get_instructor()
+        ta = self.get_ta()
         
-        if self.ta:
-            ta_name = self.ta.name
+        if instructor:
+            instructor_name = instructor.name
+        
+        if ta:
+            ta_name = ta.name
         
         return {
             'id': self.id,

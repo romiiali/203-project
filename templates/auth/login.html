@@ -11,16 +11,6 @@
         <h1>Smart Course Registration System</h1>
         <div class="system-subtitle">University Student Portal</div>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="{{ 'success-message' if category == 'success' else 'error-message' }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
         <form method="POST" action="/login" class="form-container">
             <div class="form-group">
                 <label for="email">Email:</label>
@@ -48,10 +38,10 @@
         <div class="demo-accounts">
             <p>Demo Accounts:</p>
             <div class="accounts-list">
-                <strong>Student:</strong> john@student.edu / student123<br>
-                <strong>Instructor:</strong> sarah@instructor.edu / prof123<br>
-                <strong>Admin:</strong> admin@university.edu / admin123<br>
-                <strong>TA:</strong> alex@ta.edu / ta123
+                <strong>Student:</strong> john@student.edu / password123<br>
+                <strong>Instructor:</strong> sarah@instructor.edu / password123<br>
+                <strong>Admin:</strong> admin@university.edu / password123<br>
+                <strong>TA:</strong> alex@ta.edu / password123
             </div>
         </div>
     </div>

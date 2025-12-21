@@ -13,7 +13,6 @@ def login():
         if user:
             session['user_id'] = user.id
             session['role'] = user.role
-            
             if user.role == 'student':
                 return redirect('/student/dashboard')
             elif user.role == 'instructor':
@@ -22,10 +21,6 @@ def login():
                 return redirect('/ta/dashboard')
             elif user.role == 'admin':
                 return redirect('/admin/dashboard')
-            else:
-                flash("Unknown user role", "error")
-                session.pop('user_id', None)
-                return redirect('/login')
         else:
             flash("Invalid email or password", "error")  # <-- This is in the wrong place!
     

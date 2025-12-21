@@ -5,6 +5,7 @@ from models.user import User
 from models.student import Student
 from models.assignment import Assignment
 from models.announcement import Announcement
+from models.submission import Submission
 
 ta_bp = Blueprint('ta', __name__, url_prefix='/ta')
 
@@ -62,10 +63,20 @@ def course_details(course_id):
         flash("Course not found", "error")
         return redirect(url_for('ta.dashboard'))
     
+    # Check if TA is assigned to this course
+    ta = TA.get_by_id(session['user_id'])
+    if not ta.is_assigned_to_course(course_id):
+        flash("You are not assigned to this course", "error")
+        return redirect(url_for('ta.dashboard'))
+    
     # Get all students (for enrollment management)
     students = Student.get_all_students()
+    enrolled_students = course.get_enrolled_students()
     
-    return render_template('ta/course_details.html', course=course, students=students)
+    return render_template('ta/course_details.html', 
+                         course=course, 
+                         students=students,
+                         enrolled_students=enrolled_students)
 
 @ta_bp.route('/course/<int:course_id>/add_assignment', methods=['POST'])
 def add_assignment(course_id):
@@ -77,13 +88,22 @@ def add_assignment(course_id):
         flash("Course not found", "error")
         return redirect(url_for('ta.dashboard'))
     
+    # Check if TA is assigned to this course
+    ta = TA.get_by_id(session['user_id'])
+    if not ta.is_assigned_to_course(course_id):
+        flash("You are not assigned to this course", "error")
+        return redirect(url_for('ta.dashboard'))
+    
     title = request.form.get('title')
     description = request.form.get('description')
     due_date = request.form.get('due_date')
     
     if title and description and due_date:
         assignment = course.add_assignment(title, description, due_date)
-        flash('Assignment added successfully!', 'success')
+        if assignment:
+            flash('Assignment added successfully!', 'success')
+        else:
+            flash('Failed to add assignment', 'error')
     else:
         flash('Please fill all fields', 'error')
     
@@ -99,12 +119,21 @@ def add_announcement(course_id):
         flash("Course not found", "error")
         return redirect(url_for('ta.dashboard'))
     
+    # Check if TA is assigned to this course
+    ta = TA.get_by_id(session['user_id'])
+    if not ta.is_assigned_to_course(course_id):
+        flash("You are not assigned to this course", "error")
+        return redirect(url_for('ta.dashboard'))
+    
     title = request.form.get('title')
     content = request.form.get('content')
     
     if title and content:
         announcement = course.add_announcement(title, content, session['user_id'])
-        flash('Announcement added successfully!', 'success')
+        if announcement:
+            flash('Announcement added successfully!', 'success')
+        else:
+            flash('Failed to add announcement', 'error')
     else:
         flash('Please fill all fields', 'error')
     
@@ -118,6 +147,12 @@ def attendance(course_id):
     course = Course.get_by_id(course_id)
     if not course:
         flash("Course not found", "error")
+        return redirect(url_for('ta.dashboard'))
+    
+    # Check if TA is assigned to this course
+    ta = TA.get_by_id(session['user_id'])
+    if not ta.is_assigned_to_course(course_id):
+        flash("You are not assigned to this course", "error")
         return redirect(url_for('ta.dashboard'))
     
     students = course.get_enrolled_students()
@@ -139,43 +174,49 @@ def view_submissions(assignment_id):
         flash("Assignment not found", "error")
         return redirect(url_for('ta.dashboard'))
     
-    # Get all submissions
-    submissions_data = assignment.get_all_submissions()
+    # Check if TA is assigned to the course this assignment belongs to
+    ta = TA.get_by_id(session['user_id'])
+    course = Course.get_by_id(assignment.course_id)
     
-    # Convert to list of submission objects with student info
-    submissions = []
-    for student_id, submission_info in submissions_data.items():
-        student = Student.get_by_id(student_id)
-        if student:
-            submissions.append({
-                'student': student,
-                'grade': submission_info.get('grade'),
-                'feedback': submission_info.get('feedback'),
-                'timestamp': submission_info.get('timestamp'),
-                'text': submission_info.get('text'),
-                'id': student_id  # Using student_id as submission id for now
-            })
+    if not course or not ta.is_assigned_to_course(course.id):
+        flash("You are not assigned to this course", "error")
+        return redirect(url_for('ta.dashboard'))
+    
+    # Get all submissions with the FIXED format
+    submissions = assignment.get_all_submissions()
     
     return render_template('ta/assignment_submissions.html', 
                          assignment=assignment, 
-                         submissions=submissions)
+                         submissions=submissions,
+                         course=course)
 
-@ta_bp.route('/submission/<int:student_id>/grade', methods=['POST'])
-def submit_grade(student_id):
+@ta_bp.route('/submission/<int:submission_id>/grade', methods=['POST'])
+def submit_grade(submission_id):
     if 'user_id' not in session or session.get('role') != 'ta':
         return redirect('/login')
     
-    assignment_id = request.form.get('assignment_id')
+    submission = Submission.query.get(submission_id)
+    if not submission:
+        flash("Submission not found", "error")
+        return redirect(request.referrer or url_for('ta.dashboard'))
+    
+    # Check if TA can grade this submission
+    ta = TA.get_by_id(session['user_id'])
+    assignment = Assignment.get_by_id(submission.assignment_id)
+    course = Course.get_by_id(assignment.course_id) if assignment else None
+    
+    if not assignment or not course or not ta.is_assigned_to_course(course.id):
+        flash("You are not assigned to grade this submission", "error")
+        return redirect(request.referrer or url_for('ta.dashboard'))
+    
     grade = request.form.get('grade')
     feedback = request.form.get('feedback')
     
-    assignment = Assignment.get_by_id(int(assignment_id)) if assignment_id else None
-    
-    if assignment and grade:
-        success, message = assignment.grade_submission(student_id, grade, feedback)
+    if grade:
+        success, message = assignment.grade_submission(submission.student_id, grade, feedback)
         flash(message, 'success' if success else 'error')
     else:
-        flash('Assignment not found or grade missing', 'error')
+        flash('Grade is required', 'error')
     
     return redirect(request.referrer or url_for('ta.dashboard'))
 
@@ -195,3 +236,28 @@ def view_student(student_id):
     return render_template('ta/student_profile.html', 
                          student=student, 
                          courses=enrolled_courses)
+
+@ta_bp.route('/course/<int:course_id>/enroll_student/<int:student_id>')
+def enroll_student(course_id, student_id):
+    """Enroll a student in a course (TA function)"""
+    if 'user_id' not in session or session.get('role') != 'ta':
+        return redirect('/login')
+    
+    course = Course.get_by_id(course_id)
+    if not course:
+        flash("Course not found", "error")
+        return redirect(url_for('ta.dashboard'))
+    
+    # Check if TA is assigned to this course
+    ta = TA.get_by_id(session['user_id'])
+    if not ta.is_assigned_to_course(course_id):
+        flash("You are not assigned to this course", "error")
+        return redirect(url_for('ta.dashboard'))
+    
+    success = course.enroll_student(student_id)
+    if success:
+        flash('Student enrolled successfully!', 'success')
+    else:
+        flash('Failed to enroll student (no seats available or already enrolled)', 'error')
+    
+    return redirect(url_for('ta.course_details', course_id=course_id))

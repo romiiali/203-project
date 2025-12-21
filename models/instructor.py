@@ -1,96 +1,66 @@
-# from flask import Blueprint, render_template, request, redirect,url_for
-# from models.courses import Course
-# from models.people import Person
-# from models.registration import Registration
-# from models.assignment import Assignment
-# from models.announcement import Announcement
+from models.user import User
+from extensions import db
 
-# instructor_bp = Blueprint('instructor', __name__, url_prefix='/instructor')
-# CURRENT_INSTRUCTOR = "Dr. Alice Johnson"
-
-# @instructor_bp.route('/')
-# def dashboard():
-
-#     my_courses = Course.get_courses_by_instructor(CURRENT_INSTRUCTOR)
+class Instructor(User):
     
-#     course_count = len(my_courses)
     
-#     return render_template('instructor/dashboard.html', 
-#                            instructor_name=CURRENT_INSTRUCTOR, 
-#                            courses=my_courses,
-#                            course_count=course_count)
-
-
-# @instructor_bp.route('/course/<course_code>')
-# def open_course(course_code):
-#     course = Course.get_course_by_id(course_code)
+    def __init__(self, name, email, password=None, office=None, office_hours=None):
+        super().__init__(name=name, email=email, role='instructor', 
+                        password=password, office=office, office_hours=office_hours)
     
-#     assignments = Assignment.get_assignments_by_course(course_code)
-#     announcements = Announcement.get_announcements_by_course(course_code)
+    def assign_to_course(self, course_id):
+        """Assign this instructor to a course"""
+        from models.courses import Course
+        course = Course.query.get(course_id)
+        if course:
+            # Check if already assigned
+            if course.instructor_id == self.id:
+                return False, "Already assigned to this course"
+            
+            # Assign instructor to course
+            course.instructor_id = self.id
+            db.session.commit()
+            return True, "Assigned to course successfully"
+        return False, "Course not found"
     
-#     return render_template('instructor/open_course.html', 
-#                            course=course, 
-#                            assignments=assignments, 
-#                            announcements=announcements)
-
-# @instructor_bp.route('/course/<course_code>/announce', methods=['GET', 'POST'])
-# def make_announcement(course_code):
-#     if request.method == 'POST':
-#         Announcement.add_announcement(
-#             course_code,
-#             request.form['title'],
-#             request.form['content']
-#         )
-#         return redirect(url_for('instructor.open_course', course_code=course_code))
-        
-#     return render_template('instructor/make_announcement.html', course_code=course_code)
-
-# @instructor_bp.route('/course/<course_code>/add_assignment', methods=['GET', 'POST'])
-# def send_assignment(course_code):
-#     if request.method == 'POST':
-#         Assignment.add_assignment(
-#             course_code,
-#             request.form['title'],
-#             request.form['description'],
-#             request.form['due_date']
-#         )
-#         return redirect(url_for('instructor.open_course', course_code=course_code))
-        
-#     return render_template('instructor/send_assignment.html', course_code=course_code)
-
-# @instructor_bp.route('/course/<course_code>/students')
-# def student_list(course_code):
-#     course = Course.get_course_by_id(course_code)
-#     all_people = Person.get_all_people()
+    def get_teaching_courses(self):
+        """Get all courses this instructor teaches"""
+        from models.courses import Course
+        return Course.query.filter_by(instructor_id=self.id).all()
     
-#     enrolled_students = []
-#     for person in all_people:
-#         if person.role == "Student":
-#             student_courses = Registration.get_student_courses(person.id)
-#             if course_code in student_courses:
-#                 enrolled_students.append(person)
-                
-#     return render_template('instructor/student_list.html', course=course, students=enrolled_students)
-
-# @instructor_bp.route('/student/<student_id>')
-# def view_student(student_id):
-#     student = Person.get_person_by_id(student_id)
-#     return render_template('instructor/view_student.html', student=student)
-
-
-# @instructor_bp.route('/course/<course_code>/edit', methods=['GET', 'POST'])
-# def edit_course(course_code):
-#     course = Course.get_course_by_id(course_code)
+    def create_assignment(self, course_id, title, description, due_date):
+        """Create assignment for a course (if instructor teaches it)"""
+        from models.courses import Course
+        course = Course.query.get(course_id)
+        if course and course.instructor_id == self.id:
+            return course.add_assignment(title, description, due_date)
+        return None
     
-#     if request.method == 'POST':
-#         Course.edit_course(
-#             course_code, 
-#             request.form['name'], 
-#             request.form['ta'], 
-#             CURRENT_INSTRUCTOR,
-#             request.form['credits'], 
-#             request.form['seats']
-#         )
-#         return redirect(url_for('instructor.open_course', course_code=course_code))
-        
-#     return render_template('instructor/edit_course.html', course=course)
+    def create_announcement(self, course_id, title, content):
+        """Create announcement for a course (if instructor teaches it)"""
+        from models.courses import Course
+        course = Course.query.get(course_id)
+        if course and course.instructor_id == self.id:
+            return course.add_announcement(title, content, self.id)
+        return None
+    
+    @staticmethod
+    def get_by_id(instructor_id):
+        """Get instructor by ID"""
+        return Instructor.query.filter_by(id=instructor_id, role='instructor').first()
+    
+    @staticmethod
+    def get_all():
+        """Get all instructors"""
+        return Instructor.query.filter_by(role='instructor').all()
+    
+    @property
+    def teaching_courses_ids(self):
+        """Get list of course IDs the instructor teaches (for compatibility)"""
+        return [course.id for course in self.get_teaching_courses()]
+    
+    def is_teaching_course(self, course_id):
+        """Check if instructor is teaching a specific course"""
+        from models.courses import Course
+        course = Course.query.get(course_id)
+        return course and course.instructor_id == self.id

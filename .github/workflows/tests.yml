@@ -1,0 +1,120 @@
+name: Run All Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  test-all:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"]
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: 🐍 Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov
+    
+    - name: 🔧 Create test configuration file
+      run: |
+        # Create configtest.py if it doesn't exist
+        if [ ! -f "configtest.py" ]; then
+          echo "Creating configtest.py for testing..."
+          cat > configtest.py << 'EOF'
+import pytest
+from app import create_app
+from extensions import db
+
+@pytest.fixture
+def app():
+    """Create and configure a Flask app for testing models"""
+    app = create_app()
+    app.config.update({
+        'TESTING': True,
+        'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
+        'SQLALCHEMY_TRACK_MODIFICATIONS': False,
+        'SECRET_KEY': 'test-secret-key',
+        'WTF_CSRF_ENABLED': False
+    })
+    
+    with app.app_context():
+        db.create_all()
+        yield app
+        db.session.remove()
+        db.drop_all()
+
+@pytest.fixture
+def session_db(app):
+    """Database session for model tests"""
+    with app.app_context():
+        yield db.session
+EOF
+        fi
+    
+    - name: 🧪 Run Model Tests
+      run: |
+        echo "=============================="
+        echo "Running Model Tests"
+        echo "=============================="
+        pytest test_user_model.py test_course_model.py test_enrollment_model.py \
+               test_assignment_model.py test_submission_model.py test_announcement_model.py \
+               test_student_model.py test_instructor_model.py test_ta_model.py \
+               -v --tb=short
+    
+    - name: 🎮 Run Controller Tests
+      run: |
+        echo "=============================="
+        echo "Running Controller Tests"
+        echo "=============================="
+        pytest test_auth_controller.py test_admin_controller.py test_student_controller.py \
+               test_instructor_controller.py test_ta_controller.py \
+               -v --tb=short
+    
+    - name: 🔗 Run Integration Tests
+      run: |
+        echo "=============================="
+        echo "Running Integration Tests"
+        echo "=============================="
+        pytest test_integration.py -v --tb=short
+    
+    - name: ⚡ Run Performance Tests
+      run: |
+        echo "=============================="
+        echo "Running Performance Tests"
+        echo "=============================="
+        pytest test_performance.py -v --tb=short
+    
+    - name: 🔒 Run Security Tests
+      run: |
+        echo "=============================="
+        echo "Running Security Tests"
+        echo "=============================="
+        pytest test_security.py -v --tb=short
+    
+    - name: 📊 Run All Tests with Coverage
+      run: |
+        echo "=============================="
+        echo "Running Complete Test Suite with Coverage"
+        echo "=============================="
+        pytest --cov=. --cov-report=xml --cov-report=term-missing
+    
+    - name: 📈 Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true

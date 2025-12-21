@@ -11,16 +11,6 @@
         <h1>Smart Course Registration System</h1>
         <div class="system-subtitle">University Student Portal</div>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="{{ 'success-message' if category == 'success' else 'error-message' }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
         <form method="POST" action="/login" class="form-container">
             <div class="form-group">
                 <label for="email">Email:</label>

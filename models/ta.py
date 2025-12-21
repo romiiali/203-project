@@ -72,7 +72,4 @@ class TA(User):
         """Property alias for get_assigned_courses (for compatibility)"""
         return self.get_assigned_courses()
     
-    def is_assigned_to_course(self, course_id):
-        """Check if TA is assigned to a specific course"""
-        course = Course.query.get(course_id)
-        return course and course.ta_id == self.id
+    

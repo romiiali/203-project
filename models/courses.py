@@ -57,11 +57,12 @@ class Course(db.Model):
     
     @staticmethod
     def search_courses(search_term=""):
+        from models.courses import Course
         if not search_term:
             return Course.query.all()
         
         search = f"%{search_term}%"
-        from sqlalchemy import sa
+        from models.courses import Course
         
         return Course.query.filter(
             (Course.code.ilike(search)) |

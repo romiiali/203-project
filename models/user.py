@@ -20,11 +20,11 @@ class User(db.Model):
     
     # Relationships - Use string-based references to avoid circular imports
     courses_instructing = db.relationship(
-    'Course',
-    foreign_keys='Course.instructor_id',
-    back_populates='instructor',
-    lazy=True
-)
+        'Course',
+        foreign_keys='Course.instructor_id',
+        back_populates='instructor',
+        lazy=True
+    )
 
     courses_ta = db.relationship(
         'Course',
@@ -32,15 +32,16 @@ class User(db.Model):
         back_populates='ta',
         lazy=True
     )
-    submissions = db.relationship('Submission', backref='student', lazy=True)
-    announcements_posted = db.relationship('Announcement', backref='poster', lazy=True)
-    enrolled_courses = db.relationship('Enrollment', backref='enrolled_student', lazy=True)
     
-    # Single-table inheritance discriminator
-    __mapper_args__ = {
-        'polymorphic_identity': 'user',
-        'polymorphic_on': role
-    }
+    submissions = db.relationship('Submission', backref='student', lazy=True)
+    announcements_posted = db.relationship(
+            'Announcement', 
+            back_populates='poster',
+            lazy=True
+        )    
+    enrolled_courses = db.relationship('Enrollment', backref='enrolled_student', lazy=True)
+        
+  
     
     def __init__(self, name, email, role, password=None, **kwargs):
         self.name = name
@@ -52,7 +53,7 @@ class User(db.Model):
             self.set_password(password)
         else:
             # Set a default password if none provided
-            self.set_password("default123")
+            self.set_password("password123")
         
         # Set role-specific fields
         if role == 'student':
@@ -64,6 +65,7 @@ class User(db.Model):
     
     def set_password(self, password):
         """Hash the password before storing"""
+        # Use method='pbkdf2:sha256' which is Werkzeug's default and compatible
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
@@ -73,7 +75,8 @@ class User(db.Model):
         
         try:
             return check_password_hash(self.password_hash, password)
-        except Exception:
+        except Exception as e:
+            print(f"Password check error for user {self.email}: {e}")
             return False
     
     @staticmethod
@@ -83,8 +86,12 @@ class User(db.Model):
             return None
         
         user = User.query.filter_by(email=email).first()
-        if user and user.password_hash and user.check_password(password):
-            return user
+        if user and user.password_hash:
+            # Try to check the password
+            if user.check_password(password):
+                return user
+            else:
+                print(f"Password check failed for {email}")
         return None
     
     @staticmethod

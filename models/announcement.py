@@ -1,5 +1,4 @@
 from extensions import db
-
 class Announcement(db.Model):
     __tablename__ = 'announcements'
     
@@ -8,12 +7,13 @@ class Announcement(db.Model):
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     
-    # Foreign keys
+
     poster_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
     
-    # Relationship
-    poster_user = db.relationship('User', backref='announcements')
+    # Relationships
+    poster = db.relationship('User', back_populates='announcements_posted')
+
     
     @staticmethod
     def get_by_course(course_id):

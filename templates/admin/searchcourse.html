@@ -4,37 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Course</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    {% include 'admin-nav-bar.html' %}
+    {% include 'admin/admin-nav-bar.html' %}
     <h1 style="text-align: center;">Search Courses</h1>
     <div>
-        <div id="search-bar">
-            <input type="text" id="course-search-input" placeholder="Search for a course..."  value="{{ search_query }}"/>
-            <button id="course-search-button">Search</button>
-            {%if search_query%}
+        <form id="search-bar" method="GET" action="/admin/searchcourse">
+            <input type="text" 
+                   id="course-search-input" 
+                   name="search"
+                   placeholder="Search for a course..."  
+                   value="{{ search_term }}"/>
+            <button type="submit" id="course-search-button">Search</button>
+            {% if search_term %}
                 <a href="/admin/searchcourse">
-                    <button id="clear-search-button">Clear Search</button>
+                    <button type="button" id="clear-search-button" style="position: relative; bottom: 10px; margin: 10px;font-size: medium;padding-bottom: 5px;padding-top: 5px;">Clear Search</button>
                 </a>
-            {%endif%}
-        </div>
+            {% endif %}
+        </form>
         <div id="course-container">
-            {%for course in courses %}
-                <div id="top-info">
-                    <h2>{{course.code}}-{{course.name}}</h2>
-                <p>instructor name: {{course.instructor}}</p>
-                <p>TA name: {{course.TA}}</p>
-                </div>
-                <div id="bottom-info">
-                    <p>seats left: {{course.seats}}</p>
-                    <p>credits: {{course.credits}}</p>
-                    <a href="/admin/viewcourse/{{ course.code }} ">
-                        <button id="view-btn">View</button>
-                    </a>
-                </div>
-            {%endfor%}
+            {% if courses %}
+                {% for course in courses %}
+                    <div id="top-info">
+                        <h2>{{ course.code }} - {{ course.name }}</h2>
+                        <p>Instructor: {{ course.instructor.name }}</p>
+                        <p>TA: {{ course.ta.name }}</p>
+                    </div>
+                    <div id="bottom-info">
+                        <p>Seats left: {{ course.seats_left }}</p>
+                        <p>Credits: {{ course.credits }}</p>
+                        <a href="/admin/viewcourse/{{ course.id }}">
+                            <button id="view-btn">View</button>
+                        </a>
+                    </div>
+                    <hr>
+                {% endfor %}
+            {% else %}
+                <p style="text-align: center; padding: 20px;">
+                    {% if search_term %}
+                        No courses found for "{{ search_term }}"
+                    {% else %}
+                        No courses available
+                    {% endif %}
+                </p>
+            {% endif %}
         </div>
     </div>
+    
+    <script>
+        // Add JavaScript for better UX
+        document.getElementById('course-search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('search-bar').submit();
+            }
+        });
+    </script>
 </body>
 </html>

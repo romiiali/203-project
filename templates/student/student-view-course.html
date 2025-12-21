@@ -15,7 +15,7 @@
             <a href="/student/course/{{ course.id }}/assignments" class="btn-large">View Assignments</a>
         </div>
         
-        <div style="margin-bottom: 20px;">
+        <div class="course-card" style="margin-bottom: 20px;">
             <h3>Course Information</h3>
             <p><strong>Instructor:</strong> 
                 {% if course.instructor_id %}
@@ -39,12 +39,12 @@
             <p><strong>Description:</strong> {{ course.description }}</p>
         </div>
         
-        <div style="margin-bottom: 20px;">
+        <div class="announcement" style="margin-bottom: 20px;">
             <h3>Recent Announcements</h3>
             {% if announcements %}
                 {% for announcement in announcements[:3] %}
-                    <div class="announcement">
-                        <h4>{{ announcement.title }}</h4>
+                    <div style="background-color: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+                        <h4 style="margin-top: 0;">{{ announcement.title }}</h4>
                         <p>{{ announcement.content[:100] }}{% if announcement.content|length > 100 %}...{% endif %}</p>
                         <small>{{ announcement.timestamp }}</small>
                     </div>
@@ -59,15 +59,15 @@
             {% endif %}
         </div>
         
-        <div>
+        <div class="assignment">
             <h3>Upcoming Assignments</h3>
             {% if assignments %}
                 {% for assignment in assignments[:3] %}
-                    <div class="assignment">
-                        <h4>{{ assignment.title }}</h4>
+                    <div style="background-color: #f9f9f9; padding: 15px; margin-bottom: 15px; border-radius: 5px;">
+                        <h4 style="margin-top: 0;">{{ assignment.title }}</h4>
                         <p>{{ assignment.description[:100] }}{% if assignment.description|length > 100 %}...{% endif %}</p>
                         <p><strong>Due:</strong> {{ assignment.due_date }}</p>
-                        <a href="/student/assignment/{{ assignment.id }}/submit">Submit Assignment</a>
+                        <a href="/student/assignment/{{ assignment.id }}/submit" class="btn-submit">Submit Assignment</a>
                     </div>
                 {% endfor %}
                 {% if assignments|length > 3 %}

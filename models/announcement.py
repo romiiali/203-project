@@ -1,18 +1,23 @@
-class Announcement:
-    def __init__(self, id, title, content, poster_id, course_id):
-        self.id = id
-        self.title = title
-        self.content = content
-        self.poster_id = poster_id
-        self.course_id = course_id
-        self.timestamp = "2023-10-15"
+from extensions import db
+class Announcement(db.Model):
+    __tablename__ = 'announcements'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+    
+
+    poster_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('courses.id'), nullable=False)
+    
+    # Relationships
+    poster = db.relationship('User', back_populates='announcements_posted')
+
     
     @staticmethod
     def get_by_course(course_id):
-        announcements = []
-        if course_id == 1:
-            announcements.append(Announcement(1, "Welcome to CSAI 203", "Welcome message", 2, 1))
-            announcements.append(Announcement(2, "Midterm Exam", "Midterm details", 2, 1))
-        elif course_id == 2:
-            announcements.append(Announcement(3, "Calculus Syllabus", "Syllabus posted", 2, 2))
-        return announcements
+        """Get announcements for a course"""
+        return Announcement.query.filter_by(course_id=course_id).order_by(
+            Announcement.created_at.desc()
+        ).all()

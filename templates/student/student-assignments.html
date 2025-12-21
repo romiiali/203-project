@@ -17,10 +17,9 @@
             {% for assignment in assignments %}
                 <div class="assignment">
                     <h4>{{ assignment.title }}</h4>
-                    <div style="color: #78909c; font-size: .9rem; margin-bottom: .8rem;">
-                        <span><i class="far fa-calendar-alt"></i> Due: {{ assignment.due_date }}</span>
+                    <div style="color: #666; font-size: .9rem; margin-bottom: .8rem;">
+                        <span>Due: {{ assignment.due_date }}</span>
                         <span style="margin-left: 15px;">
-                            <i class="fas fa-user"></i> 
                             {% set instructor = course.get_instructor() %}
                             {{ instructor.name if instructor else 'Not Assigned' }}
                         </span>
@@ -53,7 +52,7 @@
                 </div>
             {% endfor %}
         {% else %}
-            <div style="text-align: center; padding: 40px; color: #666;">
+            <div style="text-align: center; padding: 40px; color: #666; background-color: wheat; border-radius: 8px;">
                 <p>No assignments for this course yet.</p>
             </div>
         {% endif %}

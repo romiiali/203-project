@@ -3,25 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet"href="style.css">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% include 'admin/admin-nav-bar.html' %}
     <h1 style="text-align: center;">Admin Dashboard</h1>
-    <div id="container1">
-        <div id="container2">
+
+    <div style="display: flex; justify-content: center; margin: 40px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
             <div id="option">
                 <a href="/admin/searchcourse">
-                <h2 style="margin: 5px;">Search Courses</h2>
+                    <h2 style="margin: 5px;">Search Courses</h2>
                 </a>
             </div>
             <div id="option">
                 <a href="/admin/addperson">
-                    <h2 style="margin-left: 5px;">Add personel</h2>
+                    <h2 style="margin-left: 5px;">Add Personnel</h2>
                 </a>
             </div>
             <div id="option">
-                <a href="/admin/searchperson">
+                <a href="/admin/searchpeople">
                     <h2 style="margin: 5px;">Search People</h2>
                 </a>
             </div>
@@ -29,10 +31,8 @@
                 <a href="/admin/addcourse">
                     <h2 style="margin-left: 5px;">Add Course</h2>
                 </a>
-                
             </div>
         </div>
     </div>
-    
 </body>
 </html>

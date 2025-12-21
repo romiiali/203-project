@@ -14,20 +14,20 @@
     </div>
     
     <div id="container1">
-        <div style="margin-bottom: 20px;">
+        <div style="margin-bottom: 20px; background-color: wheat; padding: 20px; border-radius: 8px; border: 1px solid #999;">
             <h4>Assignment Description:</h4>
             <p>{{ assignment.description }}</p>
             <p><strong>Due Date:</strong> {{ assignment.due_date }}</p>
         </div>
         
         <form method="POST" action="/student/assignment/{{ assignment.id }}/submit" enctype="multipart/form-data">
-            <div style="margin-bottom: 20px;">
+            <div style="margin-bottom: 20px; background-color: wheat; padding: 20px; border-radius: 8px; border: 1px solid #999;">
                 <h4>Your Submission:</h4>
-                <textarea name="submission_text" rows="10" style="width: 100%; padding: 10px;" 
+                <textarea name="submission_text" rows="10" style="width: 100%; padding: 10px; background-color: floralwhite;" 
                           placeholder="Write your submission here..."></textarea>
             </div>
             
-            <div style="margin-bottom: 20px;">
+            <div style="margin-bottom: 20px; background-color: wheat; padding: 20px; border-radius: 8px; border: 1px solid #999;">
                 <h4>Upload Files:</h4>
                 <input type="file" name="files" style="margin-bottom: 10px;">
                 <p style="font-size: 12px; color: #666;">Allowed: PDF, DOC, ZIP (Max: 10MB)</p>

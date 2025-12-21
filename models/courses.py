@@ -1,71 +1,185 @@
-class Course:
-    def __init__(self, course_code, name, TA, instructor,credits,seats):
-        self.course_code = course_code
-        self.name=name
-        self.TA = TA
-        self.credits=credits
-        self.seats=seats
-        self.instructor = instructor
-
-    def get_all_courses(self):
-        return[
-            Course("CS101", "Introduction to Computer Science", "John Smith", "Dr. Alice Johnson", 3, 30),
-            Course("MATH201", "Calculus I", "Emily Chen", "Dr. Robert Brown", 4, 25),
-            Course("PHY301", "Advanced Physics", "Mike Wilson", "Dr. Sarah Davis", 4, 20),
-            Course("ENG102", "English Composition", "Lisa Garcia", "Prof. James Miller", 3, 35),
-            Course("BIO150", "Biology Fundamentals", "David Lee", "Dr. Maria Garcia", 3, 28),
-            Course("CHEM210", "Organic Chemistry", "Anna Taylor", "Dr. Kevin Wilson", 4, 22),
-            Course("CS205", "Data Structures", "Chris Evans", "Dr. Jennifer Lopez", 3, 24),
-            Course("ART110", "Digital Art Design", "Sophia Martinez", "Prof. Daniel Kim", 2, 18)
-        ]
-
-    def get_course(self,course_code):
-        courses_data = self.get_all_courses()
-        for course in courses_data:
-            if course.course_code == course_code:
-                return course
-        return None
+from extensions import db
+from models.announcement import Announcement
+from models.assignment import Assignment
+from models.enrollment import Enrollment
+from models.submission import Submission
+class Course(db.Model):
+    __tablename__ = 'courses'
     
-    def add_course(self, course_code, name, TA, instructor, credits, seats):
-        new_course = Course(course_code, name, TA, instructor, credits, seats)
-        courses_data = self.get_all_courses()
-        courses_data.append(new_course)
-        return courses_data
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(20), unique=True, nullable=False, index=True)
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text)
+    credits = db.Column(db.Integer, nullable=False, default=3)
+    max_seats = db.Column(db.Integer, nullable=False, default=30)
+    seats_left = db.Column(db.Integer, nullable=False, default=30)
+    schedule = db.Column(db.String(100))
+    department = db.Column(db.String(100))
     
-    def edit_course(self, course_code, name, TA, instructor, credits, seats):
-        courses_data = self.get_all_courses()
-        for course in courses_data:
-            if course.course_code == course_code:
-                course.name = name
-                course.TA = TA
-                course.instructor = instructor
-                course.credits = credits
-                course.seats = seats
-                return course
-        return None
+    # Foreign keys
+    instructor_id = db.Column(db.Integer,db.ForeignKey('users.id'),nullable=False)
 
-    def delete_course(self, course_code):
-        courses_data = self.get_all_courses()
-        for course in courses_data:
-            if course.course_code == course_code:
-                courses_data.remove(course)
-                return courses_data
-        return None
+    ta_id = db.Column(db.Integer,db.ForeignKey('users.id'),nullable=True)
+
+    instructor = db.relationship('User',foreign_keys=[instructor_id],back_populates='courses_instructing')
+
+    ta = db.relationship('User',foreign_keys=[ta_id],back_populates='courses_ta')
     
-    def search_courses(self, search_term=""):
-        all_courses = self.get_all_courses()
+    # Relationships - Use string references
+    announcements = db.relationship('Announcement', backref='course', cascade='all, delete-orphan')
+    assignments = db.relationship('Assignment', backref='course', cascade='all, delete-orphan')
+    enrollments = db.relationship('Enrollment', backref='course', cascade='all, delete-orphan')
+    
+    def __init__(self, code, name, description=None, instructor_id=None, ta_id=None, 
+                 credits=3, max_seats=30, schedule="TBA", department="General"):
+        self.code = code
+        self.name = name
+        self.description = description or f"Course: {name}"
+        self.instructor_id = instructor_id
+        self.ta_id = ta_id
+        self.credits = credits
+        self.max_seats = max_seats
+        self.seats_left = max_seats
+        self.schedule = schedule
+        self.department = department
+    
+    @staticmethod
+    def get_all():
+        return Course.query.all()
+    
+    @staticmethod
+    def get_by_id(course_id):
+        return Course.query.get(course_id)
 
-        if not search_term or search_term.strip() == "":
-            return all_courses
+    @classmethod
+    def get_courses_by_instructor(cls, instructor_name):
+        return [cls(**data) for data in cls._courses_data if data['instructor'] == instructor_name]
+    
+    @staticmethod
+    def get_by_code(course_code):
+        return Course.query.filter_by(code=course_code).first()
+    
+    @staticmethod
+    def search_courses(search_term=""):
+        from models.courses import Course
+        if not search_term:
+            return Course.query.all()
         
-        search_term = search_term.lower().strip()
-        matching_courses = []
+        search = f"%{search_term}%"
+        from models.courses import Course
         
-        for course in all_courses:
-            if (search_term in course.course_code.lower() or 
-                search_term in course.name.lower() or 
-                search_term in course.instructor.lower() or
-                search_term in course.TA.lower()):
-                matching_courses.append(course)
+        return Course.query.filter(
+            (Course.code.ilike(search)) |
+            (Course.name.ilike(search)) |
+            (Course.description.ilike(search)) |
+            (Course.department.ilike(search))
+        ).all()
+    
+    def get_enrolled_students(self):
+        """Get enrolled students for this course"""
+        from models.enrollment import Enrollment
+        from models.user import User
+        return db.session.query(User).join(Enrollment).filter(
+            Enrollment.course_id == self.id,
+            User.role == 'student'
+        ).all()
+    
+    def enroll_student(self, student_id):
+        """Enroll a student in this course"""
+        from models.enrollment import Enrollment
+        if self.seats_left > 0:
+            enrollment = Enrollment(student_id=student_id, course_id=self.id)
+            db.session.add(enrollment)
+            self.seats_left -= 1
+            db.session.commit()
+            return True
+        return False
+    
+    def drop_student(self, student_id):
+        """Drop a student from this course"""
+        from models.enrollment import Enrollment
+        enrollment = Enrollment.query.filter_by(student_id=student_id, course_id=self.id).first()
+        if enrollment:
+            db.session.delete(enrollment)
+            self.seats_left += 1
+            db.session.commit()
+            return True
+        return False
+    
+    def get_announcements(self):
+        """Get announcements for this course"""
+        from models.announcement import Announcement
+        return Announcement.query.filter_by(course_id=self.id).order_by(
+            Announcement.created_at.desc()
+        ).all()
+    
+    def get_assignments(self):
+        """Get assignments for this course"""
+        from models.assignment import Assignment
+        return Assignment.query.filter_by(course_id=self.id).all()
+    
+    def get_ta(self):
+        """Get TA assigned to this course"""
+        from models.user import User
+        return User.query.get(self.ta_id) if self.ta_id else None
+    
+    def get_instructor(self):
+        """Get instructor teaching this course"""
+        from models.user import User
+        return User.query.get(self.instructor_id) if self.instructor_id else None
+    
+    def add_assignment(self, title, description, due_date):
+        """Add assignment to course"""
+        from models.assignment import Assignment
+        assignment = Assignment(
+            title=title,
+            description=description,
+            due_date=due_date,
+            course_id=self.id
+        )
+        db.session.add(assignment)
+        db.session.commit()
+        return assignment
+    
+    def add_announcement(self, title, content, poster_id):
+        """Add announcement to course"""
+        from models.announcement import Announcement
+        announcement = Announcement(
+            title=title,
+            content=content,
+            poster_id=poster_id,
+            course_id=self.id
+        )
+        db.session.add(announcement)
+        db.session.commit()
+        return announcement
+    
+    def to_dict(self):
+        """Convert course to dictionary"""
+        instructor_name = None
+        ta_name = None
         
-        return matching_courses
+        instructor = self.get_instructor()
+        ta = self.get_ta()
+        
+        if instructor:
+            instructor_name = instructor.name
+        
+        if ta:
+            ta_name = ta.name
+        
+        return {
+            'id': self.id,
+            'code': self.code,
+            'name': self.name,
+            'description': self.description,
+            'instructor': instructor_name,
+            'instructor_id': self.instructor_id,
+            'ta': ta_name,
+            'ta_id': self.ta_id,
+            'credits': self.credits,
+            'seats': self.seats_left,
+            'max_seats': self.max_seats,
+            'schedule': self.schedule,
+            'department': self.department
+        }

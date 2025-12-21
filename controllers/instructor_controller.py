@@ -1,24 +1,24 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash, session
-from models.instructor import Instructor
-from models.courses import Course
-from models.assignment import Assignment
-from models.announcement import Announcement
+# from flask import Blueprint, render_template, redirect, url_for, request, flash, session
+# from models.instructor import Instructor
+# from models.courses import Course
+# from models.assignment import Assignment
+# from models.announcement import Announcement
 
-instructor_bp = Blueprint('instructor', __name__, url_prefix='/instructor')
+# instructor_bp = Blueprint('instructor', __name__, url_prefix='/instructor')
 
-@instructor_bp.route('/dashboard')
-def dashboard():
-    if 'user_id' not in session or session.get('role') != 'instructor':
-        return redirect('/login')
+# @instructor_bp.route('/dashboard')
+# def dashboard():
+#     if 'user_id' not in session or session.get('role') != 'instructor':
+#         return redirect('/login')
     
-    instructor = Instructor.get_by_id(session['user_id'])
-    if not instructor:
-        flash("Instructor not found", "error")
-        return redirect('/login')
+#     instructor = Instructor.get_by_id(session['user_id'])
+#     if not instructor:
+#         flash("Instructor not found", "error")
+#         return redirect('/login')
     
-    courses = instructor.get_teaching_courses()
+#     courses = instructor.get_teaching_courses()
     
-    return render_template('instructor/dashboard.html', courses=courses)
+#     return render_template('instructor/dashboard.html', courses=courses)
 
 @instructor_bp.route('/course/<int:course_id>')
 def course_details(course_id):

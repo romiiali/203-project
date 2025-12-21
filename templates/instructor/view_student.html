@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Student Profile</title></head>
+<body>
+    {% include 'instructor/instructor_nav.html' %}
+    <div class="course-details-container" style="text-align: center; background-color: white;">
+        <h1>{{ student.name }}</h1>
+        <p><strong>ID:</strong> {{ student.id }}</p>
+        <p><strong>Role:</strong> {{ student.role }}</p>
+        <button onclick="history.back()" class="btn-view">Back to List</button>
+    </div>
+</body>
+</html>

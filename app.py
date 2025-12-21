@@ -25,7 +25,7 @@ from controllers.auth_controller import auth_bp
 from controllers.student_controller import student_bp
 from controllers.TA_controller import ta_bp
 from controllers.admin_controller import admin_bp
-from controllers.instructor_controller import instructor_bp
+# from controllers.instructor_controller import instructor_bp
 
 app.secret_key = 'dev-secret-key-change-this'
 
@@ -34,7 +34,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(student_bp)
 app.register_blueprint(ta_bp)
 app.register_blueprint(admin_bp)
-app.register_blueprint(instructor_bp)
+# app.register_blueprint(instructor_bp)
 
 @app.route('/')
 def index():

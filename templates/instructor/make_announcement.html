@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head><title>Post Announcement</title></head>
+<body>
+    {% include 'instructor/instructor_nav.html' %}
+    
+    <div class="form-container">
+        <h2 style="text-align: center; color: #e67e22;">New Announcement 📢</h2>
+        <p style="text-align: center; color: #666;">For Course: {{ course_code }}</p>
+        
+        <form method="POST">
+            <label>Headline / Title</label>
+            <input type="text" name="title" required placeholder="e.g. Midterm Results are out">
+            
+            <label>Content</label>
+            <textarea name="content" required placeholder="Write your message to students here..."></textarea>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn-primary">Post Now</button>
+                <a href="{{ url_for('instructor.open_course', course_code=course_code) }}" style="width: 100%;">
+                    <button type="button" class="btn-view" style="width: 100%;">Cancel</button>
+                </a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

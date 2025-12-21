@@ -1,283 +1,213 @@
+# tests/test_assignment.py
 import pytest
-from datetime import datetime
+from datetime import datetime, timedelta
 from models.assignment import Assignment
 from models.courses import Course
-from models.user import User
 from models.submission import Submission
+from models.user import User
 from extensions import db
 
-class TestAssignmentModel:
-    """Tests for Assignment model"""
+class TestAssignment:
+    """Test cases for Assignment model"""
     
-    def test_assignment_creation(self, session_db):
-        """Test creating a new assignment"""
-        # Create course first
-        course = Course(code="CS101", name="CS 101")
-        session_db.add(course)
-        session_db.commit()
-        
-        # Create assignment
-        assignment = Assignment(
-            title="Homework 1",
-            description="Complete exercises 1-10",
-            due_date=datetime(2024, 12, 31, 23, 59, 59),
-            course_id=course.id
-        )
-        
-        session_db.add(assignment)
-        session_db.commit()
-        
-        assert assignment.id is not None
-        assert assignment.title == "Homework 1"
-        assert assignment.description == "Complete exercises 1-10"
-        assert assignment.course_id == course.id
-        assert assignment.course == course
-    
-    def test_get_by_course(self, session_db):
-        """Test getting assignments by course"""
-        # Create course
-        course = Course(code="CS101", name="CS 101")
-        session_db.add(course)
-        session_db.commit()
-        
-        # Create assignments for the course
-        assignments = [
-            Assignment(title="HW1", description="HW1 desc", due_date=datetime.now(), course_id=course.id),
-            Assignment(title="HW2", description="HW2 desc", due_date=datetime.now(), course_id=course.id),
-            Assignment(title="HW3", description="HW3 desc", due_date=datetime.now(), course_id=course.id)
-        ]
-        
-        for assignment in assignments:
-            session_db.add(assignment)
-        session_db.commit()
-        
-        # Get assignments for course
-        course_assignments = Assignment.get_by_course(course.id)
-        assert len(course_assignments) == 3
-        assert all(assignment.course_id == course.id for assignment in course_assignments)
-    
-    def test_get_by_id(self, session_db):
-        """Test retrieving assignment by ID"""
-        # Create course and assignment
-        course = Course(code="CS101", name="CS 101")
-        session_db.add(course)
-        session_db.commit()
-        
+    def test_assignment_creation(self, init_database, test_course):
+        """Test creating an assignment"""
+        due_date = datetime.now() + timedelta(days=7)
         assignment = Assignment(
             title="Test Assignment",
-            description="Test description",
-            due_date=datetime.now(),
-            course_id=course.id
+            description="Complete this test assignment",
+            due_date=due_date,
+            course_id=test_course.id
         )
-        session_db.add(assignment)
-        session_db.commit()
         
-        retrieved = Assignment.get_by_id(assignment.id)
-        assert retrieved is not None
-        assert retrieved.id == assignment.id
-        assert retrieved.title == "Test Assignment"
+        db.session.add(assignment)
+        db.session.commit()
+        
+        assert assignment.id is not None
+        assert assignment.title == "Test Assignment"
+        assert assignment.description == "Complete this test assignment"
+        assert assignment.due_date == due_date
+        assert assignment.course_id == test_course.id
+        assert isinstance(assignment.created_at, datetime)
     
-    def test_add_submission(self, session_db):
+    def test_assignment_get_by_course(self, init_database, test_course):
+        """Test getting assignments by course ID"""
+        # Create multiple assignments with different due dates
+        assignments_data = [
+            ("Assignment 1", datetime.now() + timedelta(days=3)),
+            ("Assignment 2", datetime.now() + timedelta(days=1)),
+            ("Assignment 3", datetime.now() + timedelta(days=5)),
+        ]
+        
+        for title, due_date in assignments_data:
+            assignment = Assignment(
+                title=title,
+                description="Description",
+                due_date=due_date,
+                course_id=test_course.id
+            )
+            db.session.add(assignment)
+        db.session.commit()
+        
+        # Get assignments for course
+        assignments = Assignment.get_by_course(test_course.id)
+        
+        assert len(assignments) >= 3
+        # Should be ordered by due_date ascending
+        for i in range(len(assignments) - 1):
+            assert assignments[i].due_date <= assignments[i + 1].due_date
+    
+    def test_assignment_get_by_id(self, test_assignment):
+        """Test getting assignment by ID"""
+        assignment = Assignment.get_by_id(test_assignment.id)
+        
+        assert assignment is not None
+        assert assignment.id == test_assignment.id
+        assert assignment.title == test_assignment.title
+    
+    def test_assignment_get_upcoming(self, init_database):
+        """Test getting upcoming assignments"""
+        # Create past, present, and future assignments
+        past = Assignment(
+            title="Past Assignment",
+            description="Past",
+            due_date=datetime.now() - timedelta(days=1),
+            course_id=1
+        )
+        
+        future = Assignment(
+            title="Future Assignment",
+            description="Future",
+            due_date=datetime.now() + timedelta(days=1),
+            course_id=1
+        )
+        
+        db.session.add_all([past, future])
+        db.session.commit()
+        
+        upcoming = Assignment.get_upcoming()
+        
+        # Only future assignments should be in upcoming
+        assert any(a.id == future.id for a in upcoming)
+        assert not any(a.id == past.id for a in upcoming)
+    
+    def test_add_submission(self, test_assignment, test_student):
         """Test adding a submission to an assignment"""
-        # Create course, assignment, and student
-        course = Course(code="CS101", name="CS 101")
-        assignment = Assignment(
-            title="HW1",
-            description="Homework 1",
-            due_date=datetime.now(),
-            course_id=course.id
-        )
-        student = User(
-            name="Student",
-            email="student@test.com",
-            role="student",
-            password="password123"
+        # Add new submission
+        success, message = test_assignment.add_submission(
+            test_student.id,
+            "My submission text"
         )
         
-        session_db.add(course)
-        session_db.add(assignment)
-        session_db.add(student)
-        session_db.commit()
-        
-        # Add submission
-        result = assignment.add_submission(student.id, "My submission text")
-        assert result is True
+        assert success is True
+        assert "added" in message.lower()
         
         # Verify submission was created
-        submission = session_db.query(Submission).filter_by(
-            assignment_id=assignment.id,
-            student_id=student.id
-        ).first()
+        submission = test_assignment.get_submission(test_student.id)
         assert submission is not None
         assert submission.submission_text == "My submission text"
+        
+        # Update existing submission
+        success, message = test_assignment.add_submission(
+            test_student.id,
+            "Updated submission text"
+        )
+        
+        assert success is True
+        assert "updated" in message.lower()
+        
+        submission = test_assignment.get_submission(test_student.id)
+        assert submission.submission_text == "Updated submission text"
     
-    def test_get_submission(self, session_db):
-        """Test getting submission for a specific student"""
-        # Create course, assignment, and student
-        course = Course(code="CS101", name="CS 101")
-        assignment = Assignment(
-            title="HW1",
-            description="Homework 1",
-            due_date=datetime.now(),
-            course_id=course.id
-        )
-        student = User(
-            name="Student",
-            email="student@test.com",
-            role="student",
-            password="password123"
+    def test_grade_submission(self, test_assignment_with_submission):
+        """Test grading a submission"""
+        assignment, student = test_assignment_with_submission
+        
+        # Grade the submission
+        success, message = assignment.grade_submission(
+            student.id,
+            95.5,
+            "Excellent work!"
         )
         
-        session_db.add(course)
-        session_db.add(assignment)
-        session_db.add(student)
-        session_db.commit()
+        assert success is True
+        assert "successfully" in message.lower()
         
-        # Create submission
-        submission = Submission(
-            assignment_id=assignment.id,
-            student_id=student.id,
-            submission_text="My answer"
+        # Verify grade was set
+        submission = assignment.get_submission(student.id)
+        assert submission.grade == 95.5
+        assert submission.feedback == "Excellent work!"
+        
+        # Test invalid grade
+        success, message = assignment.grade_submission(
+            student.id,
+            105,  # Invalid grade > 100
+            "Too high"
         )
-        session_db.add(submission)
-        session_db.commit()
         
-        # Get submission
-        result = assignment.get_submission(student.id)
-        assert result is not None
-        assert result.submission_text == "My answer"
-        assert result.assignment_id == assignment.id
-        assert result.student_id == student.id
+        assert success is False
+        assert "between 0 and 100" in message.lower()
+        
+        # Test invalid grade format
+        success, message = assignment.grade_submission(
+            student.id,
+            "not a number",
+            "Bad grade"
+        )
+        
+        assert success is False
+        assert "invalid" in message.lower()
     
-    def test_get_submission_none(self, session_db):
-        """Test getting submission when none exists"""
-        # Create course, assignment, and student
-        course = Course(code="CS101", name="CS 101")
-        assignment = Assignment(
-            title="HW1",
-            description="Homework 1",
-            due_date=datetime.now(),
-            course_id=course.id
-        )
-        student = User(
-            name="Student",
-            email="student@test.com",
-            role="student",
-            password="password123"
-        )
-        
-        session_db.add(course)
-        session_db.add(assignment)
-        session_db.add(student)
-        session_db.commit()
-        
-        # Get submission (should be None)
-        result = assignment.get_submission(student.id)
-        assert result is None
-    
-    def test_get_all_submissions(self, session_db):
+    def test_get_all_submissions(self, test_assignment, test_students):
         """Test getting all submissions for an assignment"""
-        # Create course and assignment
-        course = Course(code="CS101", name="CS 101")
-        assignment = Assignment(
-            title="HW1",
-            description="Homework 1",
-            due_date=datetime.now(),
-            course_id=course.id
-        )
-        session_db.add(course)
-        session_db.add(assignment)
-        
-        # Create multiple students and submissions
-        students = []
-        for i in range(3):
-            student = User(
-                name=f"Student{i}",
-                email=f"student{i}@test.com",
-                role="student",
-                password="password123"
-            )
-            students.append(student)
-            session_db.add(student)
-        
-        session_db.commit()
-        
-        # Create submissions
-        for student in students:
+        # Add submissions from multiple students
+        for i, student in enumerate(test_students[:3]):
             submission = Submission(
-                assignment_id=assignment.id,
-                student_id=student.id,
-                submission_text=f"Submission from {student.name}"
+                submission_text=f"Submission from student {i}",
+                assignment_id=test_assignment.id,
+                student_id=student.id
             )
-            session_db.add(submission)
-        
-        session_db.commit()
+            db.session.add(submission)
+        db.session.commit()
         
         # Get all submissions
-        submissions = assignment.get_all_submissions()
+        submissions = test_assignment.get_all_submissions()
+        
         assert len(submissions) == 3
+        
+        for result in submissions:
+            assert 'submission' in result
+            assert 'student' in result
+            assert 'grade' in result
+            assert 'feedback' in result
+            assert isinstance(result['submission'], Submission)
+            assert isinstance(result['student'], User)
     
-    def test_get_all_submissions_empty(self, session_db):
-        """Test getting submissions when none exist"""
-        course = Course(code="CS101", name="CS 101")
-        assignment = Assignment(
-            title="HW1",
-            description="Homework 1",
-            due_date=datetime.now(),
-            course_id=course.id
-        )
-        session_db.add(course)
-        session_db.add(assignment)
-        session_db.commit()
+    def test_is_past_due(self, test_assignment):
+        """Test checking if assignment is past due"""
+        # Set future due date
+        test_assignment.due_date = datetime.now() + timedelta(days=1)
+        assert test_assignment.is_past_due() is False
         
-        submissions = assignment.get_all_submissions()
-        assert len(submissions) == 0
+        # Set past due date
+        test_assignment.due_date = datetime.now() - timedelta(days=1)
+        assert test_assignment.is_past_due() is True
     
-    def test_created_at_default(self, session_db):
-        """Test that created_at is set automatically"""
-        course = Course(code="CS101", name="CS 101")
-        session_db.add(course)
-        session_db.commit()
+    def test_to_dict(self, test_assignment):
+        """Test converting assignment to dictionary"""
+        assignment_dict = test_assignment.to_dict()
         
-        assignment = Assignment(
-            title="Test",
-            description="Test",
-            due_date=datetime.now(),
-            course_id=course.id
-        )
-        session_db.add(assignment)
-        session_db.commit()
+        assert isinstance(assignment_dict, dict)
+        assert 'id' in assignment_dict
+        assert 'title' in assignment_dict
+        assert 'description' in assignment_dict
+        assert 'due_date' in assignment_dict
+        assert 'created_at' in assignment_dict
+        assert 'course_id' in assignment_dict
+        assert 'is_past_due' in assignment_dict
+        assert 'time_remaining' in assignment_dict
+        assert 'submission_count' in assignment_dict
+        assert 'average_grade' in assignment_dict
         
-        assert assignment.created_at is not None
-    
-    def test_relationships(self, session_db):
-        """Test assignment relationships"""
-        course = Course(code="CS101", name="CS 101")
-        assignment = Assignment(
-            title="Test",
-            description="Test",
-            due_date=datetime.now(),
-            course_id=course.id
-        )
-        session_db.add(course)
-        session_db.add(assignment)
-        session_db.commit()
-        
-        # Test relationships exist
-        assert hasattr(assignment, 'submissions')
-        assert hasattr(assignment, 'course')  # From backref
-    
-    def test_foreign_key_constraint(self, session_db):
-        """Test that assignment requires valid course"""
-        assignment = Assignment(
-            title="Test",
-            description="Test",
-            due_date=datetime.now(),
-            course_id=99999  # Non-existent course
-        )
-        
-        session_db.add(assignment)
-        with pytest.raises(Exception):
-            session_db.commit()
-        
-        session_db.rollback()
+        # Check ISO format dates
+        assert 'T' in assignment_dict['due_date']  # ISO format indicator

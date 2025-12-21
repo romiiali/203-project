@@ -26,3 +26,5 @@ class Config:
     # Session configuration
     SESSION_TYPE = 'filesystem'
     PERMANENT_SESSION_LIFETIME = 1800  # 30 minutes
+
+ 
